@@ -3,444 +3,292 @@ import Layout from "../layouts/Layout.astro";
 ---
 
 <Layout title="undefined | Nony" voidMode={true}>
-    <div class="void-container">
-        <canvas id="void-canvas"></canvas>
-        <div class="crt-overlay"></div>
-        <div class="content">
-            <h1 class="glitch" data-text="UNDEFINED">UNDEFINED</h1>
-
-            <div id="void-log" class="void-log">
-                <span class="log-entry"
-                    >> INITIATING REALITY CHECK... FAILED.</span
-                >
-            </div>
-
-            <button id="evasive-btn">[ ESCAPE SIMULATION ]</button>
+    <canvas id="flow-field"></canvas>
+    <div id="controls">
+        <div class="control-group">
+            <label>Particles</label>
+            <span id="particle-count">2000</span>
         </div>
-        <div id="flashbang" class="flashbang"></div>
+        <div class="control-group">
+            <label>Field Scale</label>
+            <span id="scale-val">0.005</span>
+        </div>
+        <p class="hint">Click & Drag to disrupt the field.</p>
     </div>
 </Layout>
 
 <script>
-    // PARTICLE SYSTEM
-    const canvas = document.getElementById("void-canvas") as HTMLCanvasElement;
-    const ctx = canvas?.getContext("2d");
+    // SIMPLEX NOISE IMPLEMENTATION (Ported for speed)
+    // --------------------------------------------------------
+    const Permutation = [
+        151, 160, 137, 91, 90, 15, 131, 13, 201, 95, 96, 53, 194, 233, 7, 225,
+        140, 36, 103, 30, 69, 142, 8, 99, 37, 240, 21, 10, 23, 190, 6, 148, 247,
+        120, 234, 75, 0, 26, 197, 62, 94, 252, 219, 203, 117, 35, 11, 32, 57,
+        177, 33, 88, 237, 149, 56, 87, 174, 20, 125, 136, 171, 168, 68, 175, 74,
+        165, 71, 134, 139, 48, 27, 166, 77, 146, 158, 231, 83, 111, 229, 122,
+        60, 211, 133, 230, 220, 105, 92, 41, 55, 46, 245, 40, 244, 102, 143, 54,
+        65, 25, 63, 161, 1, 216, 80, 73, 209, 76, 132, 187, 208, 89, 18, 169,
+        200, 196, 135, 130, 116, 188, 159, 86, 164, 100, 109, 198, 173, 186, 3,
+        64, 52, 217, 226, 250, 124, 123, 5, 202, 38, 147, 118, 126, 255, 82, 85,
+        212, 207, 206, 59, 227, 47, 16, 58, 17, 182, 189, 28, 42, 223, 183, 170,
+        213, 119, 248, 152, 2, 44, 154, 163, 70, 221, 153, 101, 155, 167, 43,
+        172, 9, 129, 22, 39, 253, 19, 98, 108, 110, 79, 113, 224, 232, 178, 185,
+        112, 104, 218, 246, 97, 228, 251, 34, 242, 193, 238, 210, 144, 12, 191,
+        179, 162, 241, 81, 51, 145, 235, 249, 14, 239, 107, 49, 192, 214, 31,
+        181, 199, 106, 157, 184, 84, 204, 176, 115, 121, 50, 45, 127, 4, 150,
+        254, 138, 236, 205, 93, 222, 114, 67, 29, 24, 72, 243, 141, 128, 195,
+        78, 66, 215, 61, 156, 180,
+    ];
+    const P = new Array(512);
+    for (let i = 0; i < 256; i++) P[256 + i] = P[i] = Permutation[i];
 
-    if (canvas && ctx) {
-        let width = window.innerWidth;
-        let height = window.innerHeight;
+    function noise(x: number, y: number, z: number) {
+        const X = Math.floor(x) & 255,
+            Y = Math.floor(y) & 255,
+            Z = Math.floor(z) & 255;
+        x -= Math.floor(x);
+        y -= Math.floor(y);
+        z -= Math.floor(z);
+        const u = fade(x),
+            v = fade(y),
+            w = fade(z);
+        const A = P[X] + Y,
+            AA = P[A] + Z,
+            AB = P[A + 1] + Z,
+            B = P[X + 1] + Y,
+            BA = P[B] + Z,
+            BB = P[B + 1] + Z;
+        return lerp(
+            w,
+            lerp(
+                v,
+                lerp(u, grad(P[AA], x, y, z), grad(P[BA], x - 1, y, z)),
+                lerp(u, grad(P[AB], x, y - 1, z), grad(P[BB], x - 1, y - 1, z)),
+            ),
+            lerp(
+                v,
+                lerp(
+                    u,
+                    grad(P[AA + 1], x, y, z - 1),
+                    grad(P[BA + 1], x - 1, y, z - 1),
+                ),
+                lerp(
+                    u,
+                    grad(P[AB + 1], x, y - 1, z - 1),
+                    grad(P[BB + 1], x - 1, y - 1, z - 1),
+                ),
+            ),
+        );
+    }
+    function fade(t: number) {
+        return t * t * t * (t * (t * 6 - 15) + 10);
+    }
+    function lerp(t: number, a: number, b: number) {
+        return a + t * (b - a);
+    }
+    function grad(hash: number, x: number, y: number, z: number) {
+        const h = hash & 15,
+            u = h < 8 ? x : y,
+            v = h < 4 ? y : h === 12 || h === 14 ? x : z;
+        return ((h & 1) === 0 ? u : -u) + ((h & 2) === 0 ? v : -v);
+    }
+    // --------------------------------------------------------
 
-        canvas.width = width;
-        canvas.height = height;
+    const canvas = document.getElementById("flow-field") as HTMLCanvasElement;
+    const ctx = canvas.getContext("2d");
 
-        class Particle {
-            x: number;
-            y: number;
-            vx: number;
-            vy: number;
-            size: number;
-            color: string;
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
 
-            constructor() {
-                this.x = Math.random() * width;
-                this.y = Math.random() * height;
-                this.vx = (Math.random() - 0.5) * 2;
-                this.vy = (Math.random() - 0.5) * 2;
-                this.size = Math.random() * 3 + 1;
-                this.color = Math.random() > 0.9 ? "#ff0000" : "#ffffff";
-            }
+    // CONFIG
+    const PARTICLE_COUNT = 3000;
+    const NOISE_SCALE = 0.005;
+    const Z_SPEED = 0.0005;
+    const OPACITY = 0.1;
 
-            update(mouseX: number, mouseY: number) {
-                this.x += this.vx;
-                this.y += this.vy;
+    let zOff = 0;
 
+    // MOUSE INTERACTION
+    let mouseX = -1000;
+    let mouseY = -1000;
+    let isMouseDown = false;
+
+    window.addEventListener("mousemove", (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+    });
+    window.addEventListener("mousedown", () => (isMouseDown = true));
+    window.addEventListener("mouseup", () => (isMouseDown = false));
+
+    class Particle {
+        x: number;
+        y: number;
+        vx: number;
+        vy: number;
+        prevX: number;
+        prevY: number;
+        color: string;
+        life: number;
+        maxLife: number;
+
+        constructor() {
+            this.x = Math.random() * width;
+            this.y = Math.random() * height;
+            this.vx = 0;
+            this.vy = 0;
+            this.prevX = this.x;
+            this.prevY = this.y;
+            this.color = this.generateColor();
+            this.life = Math.random() * 100 + 50;
+            this.maxLife = this.life;
+        }
+
+        generateColor() {
+            // Neon Palette
+            const hue = (this.x / width) * 60 + 200; // Blues/Purples
+            return `hsla(${hue}, 100%, 50%, ${OPACITY})`;
+        }
+
+        update() {
+            // Flow Field Force
+            const angle =
+                noise(this.x * NOISE_SCALE, this.y * NOISE_SCALE, zOff) *
+                Math.PI *
+                4;
+
+            // Mouse Repulsion/Attraction
+            if (isMouseDown) {
                 const dx = mouseX - this.x;
                 const dy = mouseY - this.y;
                 const dist = Math.sqrt(dx * dx + dy * dy);
-
-                if (dist < 150) {
-                    const angle = Math.atan2(dy, dx);
-                    this.vx -= Math.cos(angle) * 0.5;
-                    this.vy -= Math.sin(angle) * 0.5;
+                if (dist < 300) {
+                    this.vx += (dx / dist) * -2; // Repel
+                    this.vy += (dy / dist) * -2;
                 }
-
-                this.vx *= 0.99;
-                this.vy *= 0.99;
-
-                if (this.x < 0) this.x = width;
-                if (this.x > width) this.x = 0;
-                if (this.y < 0) this.y = height;
-                if (this.y > height) this.y = 0;
             }
 
-            draw() {
-                if (!ctx) return;
-                ctx.fillStyle = this.color;
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = this.color;
-                ctx.beginPath();
-                ctx.moveTo(this.x, this.y);
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.shadowBlur = 0;
+            this.vx += Math.cos(angle) * 0.1;
+            this.vy += Math.sin(angle) * 0.1;
+
+            this.vx *= 0.95; // Friction
+            this.vy *= 0.95;
+
+            this.prevX = this.x;
+            this.prevY = this.y;
+            this.x += this.vx;
+            this.y += this.vy;
+
+            this.life--;
+
+            // Reset dead particles or out of bounds
+            if (
+                this.x < 0 ||
+                this.x > width ||
+                this.y < 0 ||
+                this.y > height ||
+                this.life < 0
+            ) {
+                this.reset();
             }
         }
 
-        const particles: Particle[] = Array.from(
-            { length: 150 },
-            () => new Particle(),
-        );
+        reset() {
+            this.x = Math.random() * width;
+            this.y = Math.random() * height;
+            this.prevX = this.x;
+            this.prevY = this.y;
+            this.vx = 0;
+            this.vy = 0;
+            this.life = Math.random() * 100 + 50;
+        }
 
-        let mouseX = -1000;
-        let mouseY = -1000;
-
-        document.addEventListener("mousemove", (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-        });
-
-        function animate() {
+        draw() {
             if (!ctx) return;
-            ctx.fillStyle = "rgba(10, 10, 10, 0.2)";
-            ctx.fillRect(0, 0, width, height);
-
-            particles.forEach((p) => {
-                p.update(mouseX, mouseY);
-                p.draw();
-            });
-
-            ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+            ctx.strokeStyle = this.color;
             ctx.lineWidth = 1;
-            for (let i = 0; i < particles.length; i++) {
-                for (let j = i + 1; j < particles.length; j++) {
-                    const dx = particles[i].x - particles[j].x;
-                    const dy = particles[i].y - particles[j].y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-
-                    if (dist < 100) {
-                        ctx.beginPath();
-                        ctx.moveTo(particles[i].x, particles[i].y);
-                        ctx.lineTo(particles[j].x, particles[j].y);
-                        ctx.stroke();
-                    }
-                }
-            }
-            requestAnimationFrame(animate);
-        }
-
-        animate();
-
-        window.addEventListener("resize", () => {
-            width = window.innerWidth;
-            height = window.innerHeight;
-            canvas.width = width;
-            canvas.height = height;
-        });
-    }
-
-    // EVASIVE & CHAOS LOGIC
-    const btn = document.getElementById("evasive-btn");
-    const logContainer = document.getElementById("void-log");
-    const flashbang = document.getElementById("flashbang");
-
-    const logs = [
-        "Why are you trying to leave?",
-        "There is no escape.",
-        "Error: User persistence is annoying.",
-        "Rerouting exit path...",
-        "Access Denied.",
-        "Stop clicking.",
-        "You are stuck here forever.",
-        "Reality not found.",
-    ];
-
-    function addLog(text: string) {
-        if (!logContainer) return;
-        const entry = document.createElement("div");
-        entry.className = "log-entry";
-        entry.innerText = `> ${text}`;
-        logContainer.appendChild(entry);
-        logContainer.scrollTop = logContainer.scrollHeight;
-
-        if (logContainer.childElementCount > 5) {
-            logContainer.firstChild?.remove();
+            ctx.beginPath();
+            ctx.moveTo(this.prevX, this.prevY);
+            ctx.lineTo(this.x, this.y);
+            ctx.stroke();
         }
     }
 
-    // DECONSTRUCTION FUNCTION
-    async function initiateDeconstruction() {
-        if (btn) btn.style.display = "none";
-        addLog("CRITICAL FAILURE. SIMULATION COLLAPSING.");
-
-        const allElements = Array.from(document.querySelectorAll("*"));
-        // Filter out scripts and styles to prevent breaking logic immediately
-        const visibleElements = allElements.filter((el) => {
-            return (
-                ![
-                    "SCRIPT",
-                    "STYLE",
-                    "HTML",
-                    "HEAD",
-                    "META",
-                    "LINK",
-                    "TITLE",
-                    "BODY",
-                ].includes(el.tagName) && el.id !== "void-log"
-            );
-        });
-
-        // Randomly replace elements with their HTML source code text
-        for (let i = 0; i < visibleElements.length; i++) {
-            const el = visibleElements[i] as HTMLElement;
-            if (Math.random() > 0.5) {
-                await new Promise((r) => setTimeout(r, 5)); // Speed
-                el.innerText = el.outerHTML;
-                el.style.fontFamily = "'Share Tech Mono', monospace";
-                el.style.color = "#00ff00";
-                el.style.border = "1px dashed #00ff00";
-                el.style.background = "black";
-                el.style.padding = "5px";
-                el.style.fontSize = "10px";
-            }
-        }
-
-        // Final Log
-        await new Promise((r) => setTimeout(r, 1000));
-        addLog("BYE BYE.");
-
-        // Flashbang
-        if (flashbang) {
-            flashbang.style.opacity = "1";
-            setTimeout(() => {
-                window.location.href = "/";
-            }, 2000); // Wait for whiteout
-        }
+    const particles: Particle[] = [];
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+        particles.push(new Particle());
     }
 
-    if (btn) {
-        btn.addEventListener("mouseover", () => {
-            // 20% Chance to actually let you click it to trigger chaos
-            if (Math.random() > 0.8) {
-                btn.innerText = "DO NOT CLICK";
-                btn.style.transform = "none";
-                btn.style.borderColor = "red";
-                btn.style.background = "red";
-                btn.style.color = "black";
-                return;
-            }
+    function animate() {
+        if (!ctx) return;
 
-            const x = (Math.random() - 0.5) * 400;
-            const y = (Math.random() - 0.5) * 400;
-            btn.style.transform = `translate(${x}px, ${y}px)`;
-            addLog(logs[Math.floor(Math.random() * logs.length)]);
-        });
+        // Trail effect
+        ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+        ctx.fillRect(0, 0, width, height);
 
-        btn.addEventListener("click", () => {
-            initiateDeconstruction();
-        });
+        zOff += Z_SPEED;
+
+        for (const p of particles) {
+            p.update();
+            p.draw();
+        }
+
+        requestAnimationFrame(animate);
     }
 
-    // Auto logs
-    setInterval(() => {
-        if (Math.random() > 0.8) {
-            addLog("System monitoring user activity...");
-        }
-    }, 4000);
+    animate();
+
+    window.addEventListener("resize", () => {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+    });
 </script>
 
 <style>
     @import url("https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap");
 
-    .void-container {
-        position: fixed;
-        inset: 0;
-        background: #050505;
-        z-index: 99999;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
+    :global(body) {
+        margin: 0;
+        padding: 0;
         overflow: hidden;
-        font-family: "Share Tech Mono", monospace;
+        background: #000;
     }
 
     canvas {
-        position: absolute;
-        top: 0;
-        left: 0;
+        display: block;
+        position: fixed;
+        inset: 0;
         z-index: 1;
     }
 
-    .crt-overlay {
-        position: absolute;
-        inset: 0;
-        background:
-            linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
-            linear-gradient(
-                90deg,
-                rgba(255, 0, 0, 0.06),
-                rgba(0, 255, 0, 0.02),
-                rgba(0, 0, 255, 0.06)
-            );
-        background-size:
-            100% 2px,
-            3px 100%;
-        pointer-events: none;
-        z-index: 5;
-    }
-
-    .content {
-        position: relative;
-        z-index: 10;
-        text-align: center;
-        text-transform: uppercase;
-    }
-
-    h1 {
-        font-size: 8rem;
-        margin: 0;
-        font-weight: 700;
-        letter-spacing: -5px;
-        color: #fff;
-        text-shadow:
-            2px 2px 0px #ff0000,
-            -2px -2px 0px #0000ff;
-    }
-
-    .void-log {
-        font-family: "Share Tech Mono", monospace;
-        color: var(--color-primary);
-        font-size: 0.9rem;
-        margin: 2rem 0;
-        height: 100px;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-end;
-        align-items: center;
-        opacity: 0.8;
-    }
-
-    button {
-        background: rgba(255, 0, 0, 0.1);
-        border: 1px solid #ff3333;
-        color: #ff3333;
-        padding: 1rem 3rem;
-        font-family: "Share Tech Mono", monospace;
-        font-size: 1.2rem;
-        cursor: pointer;
-        transition: transform 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        position: relative;
-        z-index: 20;
-    }
-
-    button:hover {
-        background: #ff3333;
-        color: #000;
-        box-shadow: 0 0 30px rgba(255, 50, 50, 0.5);
-    }
-
-    .flashbang {
+    #controls {
         position: fixed;
-        inset: 0;
-        background: white;
-        z-index: 100000;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 1.5s ease-in;
+        bottom: 20px;
+        left: 20px;
+        z-index: 10;
+        color: rgba(255, 255, 255, 0.4);
+        font-family: "Share Tech Mono", monospace;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        backdrop-filter: blur(5px);
+        pointer-events: none; /* Just display for now */
     }
 
-    /* Glitch Animation */
-    .glitch {
-        animation: glitch-skew 1s infinite linear alternate-reverse;
+    .hint {
+        margin: 0;
+        font-size: 0.8rem;
     }
 
-    .glitch::before,
-    .glitch::after {
-        content: attr(data-text);
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-    }
-
-    .glitch::before {
-        left: 2px;
-        text-shadow: -2px 0 #ff00c1;
-        clip: rect(44px, 450px, 56px, 0);
-        animation: glitch-anim-1 5s infinite linear alternate-reverse;
-    }
-
-    .glitch::after {
-        left: -2px;
-        text-shadow: -2px 0 #00fff9;
-        clip: rect(44px, 450px, 56px, 0);
-        animation: glitch-anim-2 5s infinite linear alternate-reverse;
-    }
-
-    @keyframes glitch-anim-1 {
-        0% {
-            clip: rect(30px, 9999px, 10px, 0);
-        }
-        20% {
-            clip: rect(80px, 9999px, 90px, 0);
-        }
-        40% {
-            clip: rect(10px, 9999px, 50px, 0);
-        }
-        60% {
-            clip: rect(60px, 9999px, 20px, 0);
-        }
-        80% {
-            clip: rect(120px, 9999px, 10px, 0);
-        }
-        100% {
-            clip: rect(30px, 9999px, 70px, 0);
-        }
-    }
-
-    @keyframes glitch-anim-2 {
-        0% {
-            clip: rect(10px, 9999px, 80px, 0);
-        }
-        20% {
-            clip: rect(90px, 9999px, 10px, 0);
-        }
-        40% {
-            clip: rect(60px, 9999px, 5px, 0);
-        }
-        60% {
-            clip: rect(20px, 9999px, 100px, 0);
-        }
-        80% {
-            clip: rect(10px, 9999px, 40px, 0);
-        }
-        100% {
-            clip: rect(50px, 9999px, 80px, 0);
-        }
-    }
-
-    @keyframes glitch-skew {
-        0% {
-            transform: skew(0deg);
-        }
-        20% {
-            transform: skew(-2deg);
-        }
-        40% {
-            transform: skew(2deg);
-        }
-        60% {
-            transform: skew(0deg);
-        }
-        80% {
-            transform: skew(-1deg);
-        }
-        100% {
-            transform: skew(1deg);
-        }
+    .control-group {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        width: 150px;
     }
 </style>
