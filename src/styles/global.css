@@ -1,0 +1,212 @@
+/* Google Fonts handled in Layout */
+
+:root {
+    /* V1 Pastel Palette with solid colors - HIGH CONTRAST TEXT */
+    --color-bg: #FDFCF5;
+    --color-text: #222222;
+    --color-text-light: #555555;
+
+    /* Blobs / Shapes colors - Keeping pastel but vibrant */
+    --color-blob-1: #FFB7B2;
+    /* Pink */
+    --color-blob-2: #B5EAD7;
+    /* Mint */
+    --color-blob-3: #E2F0CB;
+    /* Lime */
+    --color-blob-4: #C7CEEA;
+    /* Periwinkle */
+    --color-blob-5: #FFDAC1;
+    /* Peach */
+
+    --color-primary: #E07A7A;
+    --color-primary-rgb: 224, 122, 122;
+    /* Darker Pink */
+    --color-secondary: #7AC5A6;
+    /* Darker Mint */
+
+    --color-surface: rgba(255, 255, 255, 0.7);
+    --color-border: rgba(255, 255, 255, 0.8);
+
+    --font-heading: 'Fraunces', serif;
+    --font-body: 'Outfit', sans-serif;
+
+    --radius-sm: 12px;
+    --radius-md: 24px;
+    --radius-lg: 40px;
+
+    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.08);
+
+    --glass-blur: blur(16px);
+}
+
+/* DARK MODE VARS */
+html.dark {
+    --color-bg: #1a1a1a;
+    --color-text: #eaeaea;
+    --color-text-light: #aaa;
+
+    /* Neon Pastels */
+    --color-blob-1: #ff7eb3;
+    --color-blob-2: #7afcff;
+    --color-blob-3: #feff9c;
+    --color-blob-4: #8a2be2;
+    /* deeper purple */
+    --color-blob-5: #ff65a3;
+
+    --color-primary: #ff9aa2;
+    --color-primary-rgb: 255, 154, 162;
+    --color-secondary: #8bf6ff;
+
+    --color-surface: rgba(0, 0, 0, 0.6);
+    --color-border: rgba(255, 255, 255, 0.1);
+
+    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+html {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    line-height: 1.7;
+    overflow-x: hidden;
+    position: relative;
+}
+
+h1,
+h2,
+h3,
+h4 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    color: var(--color-text);
+    /* Fixed for dark mode */
+    margin-top: 0;
+}
+
+h1 {
+    font-size: 4rem;
+    letter-spacing: -0.02em;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+/* UTILITIES */
+.wrapper {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    position: relative;
+    z-index: 2;
+}
+
+.text-highlight {
+    color: var(--color-primary);
+    position: relative;
+    display: inline-block;
+}
+
+.glass-panel {
+    background: var(--color-surface);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn {
+    padding: 0.8rem 1.8rem;
+    border-radius: 50px;
+    font-weight: 600;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.btn-primary {
+    background: var(--color-primary);
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.dark .btn-primary {
+    color: #1a1a1a;
+}
+
+/* Invert text on dark mode primary btn */
+
+.btn-primary:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: var(--color-surface);
+    color: var(--color-text);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--color-border);
+}
+
+.btn:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-md);
+}
+
+/* UNIVERSAL BLOBS UTILITY - PERFORMANCE OPTIMIZED */
+.blob-shape {
+    position: absolute;
+    z-index: -1;
+    filter: blur(40px);
+    /* Reduced from 50px */
+    opacity: 0.6;
+    /* Reduced opacity */
+    will-change: transform;
+    transform: translate3d(0, 0, 0);
+    /* Force hardware acceleration */
+}
+
+@keyframes float {
+    0% {
+        transform: translate3d(0, 0, 0) rotate(0deg);
+    }
+
+    100% {
+        transform: translate3d(20px, -20px, 0) rotate(5deg);
+    }
+}
+
+/* Reduce backdrop filter load on low power if possible, but hard to detect in pure CSS easily without queries.
+   We'll just keep it but ensure layers are promoted. */
+.glass-panel {
+    background: var(--color-surface);
+    backdrop-filter: blur(12px);
+    /* Reduced from 16px */
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    transform: translate3d(0, 0, 0);
+}

@@ -1,0 +1,91 @@
+<script>
+    // EASTER EGG MANAGER
+    class EasterEggManager {
+        konamiCode: string[];
+        konamiIndex: number;
+
+        constructor() {
+            this.konamiCode = [
+                "ArrowUp",
+                "ArrowUp",
+                "ArrowDown",
+                "ArrowDown",
+                "ArrowLeft",
+                "ArrowRight",
+                "ArrowLeft",
+                "ArrowRight",
+                "b",
+                "a",
+            ];
+            this.konamiIndex = 0;
+            this.init();
+        }
+
+        init() {
+            document.addEventListener("keydown", (e) => this.checkKonami(e));
+            console.log(
+                "%c STOP LOOKING AT MY CONSOLE ",
+                "background: #222; color: #bada55; font-size: 20px; font-weight: bold; border-radius: 5px; padding: 10px;",
+            );
+            console.log('Use key "K" to spawn a glitch.');
+
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "k" || e.key === "K") {
+                    this.spawnGlitch();
+                }
+            });
+        }
+
+        checkKonami(e) {
+            if (e.key === this.konamiCode[this.konamiIndex]) {
+                this.konamiIndex++;
+                if (this.konamiIndex === this.konamiCode.length) {
+                    this.activateGodMode();
+                    this.konamiIndex = 0;
+                }
+            } else {
+                this.konamiIndex = 0;
+            }
+        }
+
+        activateGodMode() {
+            alert("GOD MODE ACTIVATED: Prepare for chaos.");
+            document.body.style.filter = "invert(1) hue-rotate(180deg)";
+            document.body.style.transition = "filter 2s ease";
+
+            setTimeout(() => {
+                if (confirm("Take me to the void?")) {
+                    window.location.href = "/nowhere";
+                }
+            }, 1000);
+        }
+
+        spawnGlitch() {
+            const glitch = document.createElement("div");
+            glitch.innerHTML = "👾";
+            glitch.style.position = "fixed";
+            glitch.style.left = Math.random() * window.innerWidth + "px";
+            glitch.style.top = Math.random() * window.innerHeight + "px";
+            glitch.style.fontSize = "2rem";
+            glitch.style.zIndex = "99999";
+            glitch.style.pointerEvents = "none";
+            glitch.style.animation = "spin 1s linear infinite";
+
+            document.body.appendChild(glitch);
+
+            setTimeout(() => glitch.remove(), 2000);
+        }
+    }
+
+    if (typeof window !== "undefined") {
+        new EasterEggManager();
+    }
+</script>
+
+<style is:global>
+    @keyframes spin {
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+</style>

@@ -1,0 +1,144 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { getCollection } from "astro:content";
+
+export async function getStaticPaths() {
+    const posts = await getCollection("rants");
+    return posts.map((post) => ({
+        params: { slug: post.slug },
+        props: { post },
+    }));
+}
+
+const { post } = Astro.props;
+const { Content } = await post.render();
+---
+
+<Layout title={`${post.data.title} | RANT`}>
+    <main class="rant-container">
+        <header class="rant-header">
+            <a href="/rants" class="back-link"
+                ><i class="ti ti-arrow-left"></i> All Rants</a
+            >
+
+            <div class="rage-indicator">
+                <span class="label">RAGE LEVEL</span>
+                <div class="meter-box">
+                    <div class="bar" style={`width: ${post.data.angerLevel}%`}>
+                    </div>
+                </div>
+                <span class="value">{post.data.angerLevel}%</span>
+            </div>
+
+            <h1 class="title">{post.data.title}</h1>
+            <div class="date">{post.data.date.toLocaleDateString()}</div>
+        </header>
+
+        <article class="prose">
+            <Content />
+        </article>
+
+        <div class="rant-footer">
+            <p>End of rant.</p>
+        </div>
+    </main>
+</Layout>
+
+<style>
+    main {
+        padding-top: 8rem;
+        max-width: 740px;
+        margin: 0 auto;
+        padding-bottom: 4rem;
+    }
+
+    .rant-header {
+        margin-bottom: 4rem;
+        text-align: center;
+    }
+
+    .back-link {
+        display: inline-flex;
+        gap: 0.5rem;
+        align-items: center;
+        color: var(--color-text-light);
+        text-decoration: none;
+        margin-bottom: 2rem;
+        transition: color 0.2s;
+    }
+    .back-link:hover {
+        color: var(--color-primary);
+    }
+
+    .rage-indicator {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        font-family: "Fira Code", monospace;
+        font-size: 0.9rem;
+        color: #ef4444;
+        margin-bottom: 1.5rem;
+    }
+
+    .meter-box {
+        width: 150px;
+        height: 10px;
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    .bar {
+        height: 100%;
+        background: #ef4444;
+    }
+
+    .title {
+        font-family: "Fraunces", serif;
+        font-size: 3rem;
+        margin: 0 0 1rem;
+        line-height: 1.1;
+    }
+    .date {
+        color: var(--color-text-light);
+        font-family: "Fira Code", monospace;
+    }
+
+    .prose {
+        font-size: 1.25rem;
+        line-height: 1.8;
+        color: var(--color-text);
+        font-family: "Crimson Text", serif;
+    }
+
+    .prose :global(h2) {
+        margin-top: 3rem;
+        margin-bottom: 1rem;
+        font-family: "Fraunces", serif;
+        font-size: 1.8rem;
+    }
+    .prose :global(p) {
+        margin-bottom: 1.5rem;
+    }
+    .prose :global(strong) {
+        color: #ef4444;
+        font-weight: 700;
+    }
+    .prose :global(blockquote) {
+        border-left: 4px solid #ef4444;
+        padding-left: 1.5rem;
+        background: rgba(239, 68, 68, 0.1);
+        padding: 1.5rem;
+        border-radius: 0 8px 8px 0;
+        font-style: italic;
+        margin: 2rem 0;
+    }
+
+    .rant-footer {
+        text-align: center;
+        margin-top: 5rem;
+        font-family: "Fira Code", monospace;
+        color: var(--color-text-light);
+        opacity: 0.5;
+    }
+</style>

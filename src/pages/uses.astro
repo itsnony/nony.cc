@@ -1,0 +1,198 @@
+---
+import Layout from "../layouts/Layout.astro";
+import config from "../config.json";
+
+const { uses } = config;
+---
+
+<Layout title="Inventory | Nony">
+    <main class="inventory-page">
+        <header class="page-header">
+            <h1>Character <span class="highlight">Loadout</span></h1>
+            <div class="stats-row">
+                <div class="stat">LVL <span>26</span></div>
+                <div class="stat">CLASS <span>Dev</span></div>
+                <div class="stat">GUILD <span>Nony.cc</span></div>
+            </div>
+        </header>
+
+        <div class="inventory-grid">
+            <!-- Weapons -->
+            <section class="slot-group">
+                <h2><i class="fi fi-rr-sword"></i> Weapons (Langs)</h2>
+                <div class="slots">
+                    {
+                        uses.languages.map((item) => (
+                            <div class="slot" title={item}>
+                                {item}
+                            </div>
+                        ))
+                    }
+                </div>
+            </section>
+
+            <!-- Armor -->
+            <section class="slot-group">
+                <h2><i class="fi fi-rr-shield"></i> Armor (Stacks)</h2>
+                <div class="slots">
+                    {
+                        uses.frameworks.map((item) => (
+                            <div
+                                class={`slot ${item.includes("Hate") ? "cursed" : ""}`}
+                                title={item}
+                            >
+                                {item}
+                            </div>
+                        ))
+                    }
+                </div>
+            </section>
+
+            <!-- Artifacts -->
+            <section class="slot-group">
+                <h2><i class="fi fi-rr-gem"></i> Artifacts (Tools)</h2>
+                <div class="slots">
+                    {
+                        uses.tools.map((item) => (
+                            <div class="slot legendary" title={item}>
+                                {item}
+                            </div>
+                        ))
+                    }
+                </div>
+            </section>
+
+            <!-- Environment -->
+            <section class="slot-group">
+                <h2><i class="fi fi-rr-cloud"></i> Environment</h2>
+                <div class="slots">
+                    {
+                        uses.services.map((item) => (
+                            <div class="slot" title={item}>
+                                {item}
+                            </div>
+                        ))
+                    }
+                </div>
+            </section>
+            <!-- Hardware -->
+            <section class="slot-group">
+                <h2><i class="fi fi-rr-microchip"></i> Hardware</h2>
+                <div class="slots">
+                    {
+                        uses.os.map((item) => (
+                            <div class="slot" title={item}>
+                                {item}
+                            </div>
+                        ))
+                    }
+                </div>
+            </section>
+        </div>
+    </main>
+</Layout>
+
+<style>
+    .inventory-page {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 8rem 2rem 4rem;
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 4rem;
+    }
+    .page-header h1 {
+        font-family: "Fraunces", serif;
+        font-size: 3.5rem;
+        margin-bottom: 1rem;
+    }
+    .highlight {
+        color: var(--color-primary);
+        font-style: italic;
+    }
+
+    .stats-row {
+        display: inline-flex;
+        gap: 2rem;
+        background: rgba(0, 0, 0, 0.05);
+        padding: 0.5rem 1.5rem;
+        border-radius: 4px;
+        margin-top: 1rem;
+        font-family: "Fira Code", monospace;
+    }
+    :global(.dark) .stats-row {
+        background: rgba(255, 255, 255, 0.05);
+    }
+    .stat span {
+        font-weight: bold;
+        color: var(--color-primary);
+    }
+
+    /* INVENTORY GRID */
+    .inventory-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 3rem;
+    }
+
+    .slot-group h2 {
+        font-family: "Fira Code", monospace;
+        font-size: 1rem;
+        color: var(--color-text-light);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-transform: uppercase;
+        border-bottom: 2px solid var(--color-border);
+        padding-bottom: 0.5rem;
+    }
+
+    .slots {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+        gap: 0.8rem;
+    }
+
+    .slot {
+        aspect-ratio: 1;
+        background: rgba(255, 255, 255, 0.3);
+        border: 2px solid rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 0.5rem;
+        transition: all 0.2s;
+        cursor: help;
+        position: relative;
+        overflow: hidden;
+    }
+    :global(.dark) .slot {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .slot:hover {
+        transform: scale(1.05);
+        border-color: var(--color-primary);
+        box-shadow: 0 0 10px rgba(var(--color-primary-rgb), 0.3);
+        z-index: 1;
+        background: rgba(var(--color-primary-rgb), 0.1);
+    }
+
+    .slot.legendary {
+        border-color: #ffd700;
+        box-shadow: inset 0 0 10px rgba(255, 215, 0, 0.2);
+    }
+    .slot.cursed {
+        border-color: #ef4444;
+        text-decoration: line-through;
+        opacity: 0.7;
+    }
+</style>

@@ -1,0 +1,446 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="undefined | Nony" voidMode={true}>
+    <div class="void-container">
+        <canvas id="void-canvas"></canvas>
+        <div class="crt-overlay"></div>
+        <div class="content">
+            <h1 class="glitch" data-text="UNDEFINED">UNDEFINED</h1>
+
+            <div id="void-log" class="void-log">
+                <span class="log-entry"
+                    >> INITIATING REALITY CHECK... FAILED.</span
+                >
+            </div>
+
+            <button id="evasive-btn">[ ESCAPE SIMULATION ]</button>
+        </div>
+        <div id="flashbang" class="flashbang"></div>
+    </div>
+</Layout>
+
+<script>
+    // PARTICLE SYSTEM
+    const canvas = document.getElementById("void-canvas") as HTMLCanvasElement;
+    const ctx = canvas?.getContext("2d");
+
+    if (canvas && ctx) {
+        let width = window.innerWidth;
+        let height = window.innerHeight;
+
+        canvas.width = width;
+        canvas.height = height;
+
+        class Particle {
+            x: number;
+            y: number;
+            vx: number;
+            vy: number;
+            size: number;
+            color: string;
+
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = (Math.random() - 0.5) * 2;
+                this.size = Math.random() * 3 + 1;
+                this.color = Math.random() > 0.9 ? "#ff0000" : "#ffffff";
+            }
+
+            update(mouseX: number, mouseY: number) {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                const dx = mouseX - this.x;
+                const dy = mouseY - this.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist < 150) {
+                    const angle = Math.atan2(dy, dx);
+                    this.vx -= Math.cos(angle) * 0.5;
+                    this.vy -= Math.sin(angle) * 0.5;
+                }
+
+                this.vx *= 0.99;
+                this.vy *= 0.99;
+
+                if (this.x < 0) this.x = width;
+                if (this.x > width) this.x = 0;
+                if (this.y < 0) this.y = height;
+                if (this.y > height) this.y = 0;
+            }
+
+            draw() {
+                if (!ctx) return;
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = this.color;
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y);
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        const particles: Particle[] = Array.from(
+            { length: 150 },
+            () => new Particle(),
+        );
+
+        let mouseX = -1000;
+        let mouseY = -1000;
+
+        document.addEventListener("mousemove", (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        function animate() {
+            if (!ctx) return;
+            ctx.fillStyle = "rgba(10, 10, 10, 0.2)";
+            ctx.fillRect(0, 0, width, height);
+
+            particles.forEach((p) => {
+                p.update(mouseX, mouseY);
+                p.draw();
+            });
+
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+            ctx.lineWidth = 1;
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < 100) {
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        window.addEventListener("resize", () => {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        });
+    }
+
+    // EVASIVE & CHAOS LOGIC
+    const btn = document.getElementById("evasive-btn");
+    const logContainer = document.getElementById("void-log");
+    const flashbang = document.getElementById("flashbang");
+
+    const logs = [
+        "Why are you trying to leave?",
+        "There is no escape.",
+        "Error: User persistence is annoying.",
+        "Rerouting exit path...",
+        "Access Denied.",
+        "Stop clicking.",
+        "You are stuck here forever.",
+        "Reality not found.",
+    ];
+
+    function addLog(text: string) {
+        if (!logContainer) return;
+        const entry = document.createElement("div");
+        entry.className = "log-entry";
+        entry.innerText = `> ${text}`;
+        logContainer.appendChild(entry);
+        logContainer.scrollTop = logContainer.scrollHeight;
+
+        if (logContainer.childElementCount > 5) {
+            logContainer.firstChild?.remove();
+        }
+    }
+
+    // DECONSTRUCTION FUNCTION
+    async function initiateDeconstruction() {
+        if (btn) btn.style.display = "none";
+        addLog("CRITICAL FAILURE. SIMULATION COLLAPSING.");
+
+        const allElements = Array.from(document.querySelectorAll("*"));
+        // Filter out scripts and styles to prevent breaking logic immediately
+        const visibleElements = allElements.filter((el) => {
+            return (
+                ![
+                    "SCRIPT",
+                    "STYLE",
+                    "HTML",
+                    "HEAD",
+                    "META",
+                    "LINK",
+                    "TITLE",
+                    "BODY",
+                ].includes(el.tagName) && el.id !== "void-log"
+            );
+        });
+
+        // Randomly replace elements with their HTML source code text
+        for (let i = 0; i < visibleElements.length; i++) {
+            const el = visibleElements[i] as HTMLElement;
+            if (Math.random() > 0.5) {
+                await new Promise((r) => setTimeout(r, 5)); // Speed
+                el.innerText = el.outerHTML;
+                el.style.fontFamily = "'Share Tech Mono', monospace";
+                el.style.color = "#00ff00";
+                el.style.border = "1px dashed #00ff00";
+                el.style.background = "black";
+                el.style.padding = "5px";
+                el.style.fontSize = "10px";
+            }
+        }
+
+        // Final Log
+        await new Promise((r) => setTimeout(r, 1000));
+        addLog("BYE BYE.");
+
+        // Flashbang
+        if (flashbang) {
+            flashbang.style.opacity = "1";
+            setTimeout(() => {
+                window.location.href = "/";
+            }, 2000); // Wait for whiteout
+        }
+    }
+
+    if (btn) {
+        btn.addEventListener("mouseover", () => {
+            // 20% Chance to actually let you click it to trigger chaos
+            if (Math.random() > 0.8) {
+                btn.innerText = "DO NOT CLICK";
+                btn.style.transform = "none";
+                btn.style.borderColor = "red";
+                btn.style.background = "red";
+                btn.style.color = "black";
+                return;
+            }
+
+            const x = (Math.random() - 0.5) * 400;
+            const y = (Math.random() - 0.5) * 400;
+            btn.style.transform = `translate(${x}px, ${y}px)`;
+            addLog(logs[Math.floor(Math.random() * logs.length)]);
+        });
+
+        btn.addEventListener("click", () => {
+            initiateDeconstruction();
+        });
+    }
+
+    // Auto logs
+    setInterval(() => {
+        if (Math.random() > 0.8) {
+            addLog("System monitoring user activity...");
+        }
+    }, 4000);
+</script>
+
+<style>
+    @import url("https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap");
+
+    .void-container {
+        position: fixed;
+        inset: 0;
+        background: #050505;
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        overflow: hidden;
+        font-family: "Share Tech Mono", monospace;
+    }
+
+    canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1;
+    }
+
+    .crt-overlay {
+        position: absolute;
+        inset: 0;
+        background:
+            linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+            linear-gradient(
+                90deg,
+                rgba(255, 0, 0, 0.06),
+                rgba(0, 255, 0, 0.02),
+                rgba(0, 0, 255, 0.06)
+            );
+        background-size:
+            100% 2px,
+            3px 100%;
+        pointer-events: none;
+        z-index: 5;
+    }
+
+    .content {
+        position: relative;
+        z-index: 10;
+        text-align: center;
+        text-transform: uppercase;
+    }
+
+    h1 {
+        font-size: 8rem;
+        margin: 0;
+        font-weight: 700;
+        letter-spacing: -5px;
+        color: #fff;
+        text-shadow:
+            2px 2px 0px #ff0000,
+            -2px -2px 0px #0000ff;
+    }
+
+    .void-log {
+        font-family: "Share Tech Mono", monospace;
+        color: var(--color-primary);
+        font-size: 0.9rem;
+        margin: 2rem 0;
+        height: 100px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: center;
+        opacity: 0.8;
+    }
+
+    button {
+        background: rgba(255, 0, 0, 0.1);
+        border: 1px solid #ff3333;
+        color: #ff3333;
+        padding: 1rem 3rem;
+        font-family: "Share Tech Mono", monospace;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: transform 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        position: relative;
+        z-index: 20;
+    }
+
+    button:hover {
+        background: #ff3333;
+        color: #000;
+        box-shadow: 0 0 30px rgba(255, 50, 50, 0.5);
+    }
+
+    .flashbang {
+        position: fixed;
+        inset: 0;
+        background: white;
+        z-index: 100000;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 1.5s ease-in;
+    }
+
+    /* Glitch Animation */
+    .glitch {
+        animation: glitch-skew 1s infinite linear alternate-reverse;
+    }
+
+    .glitch::before,
+    .glitch::after {
+        content: attr(data-text);
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .glitch::before {
+        left: 2px;
+        text-shadow: -2px 0 #ff00c1;
+        clip: rect(44px, 450px, 56px, 0);
+        animation: glitch-anim-1 5s infinite linear alternate-reverse;
+    }
+
+    .glitch::after {
+        left: -2px;
+        text-shadow: -2px 0 #00fff9;
+        clip: rect(44px, 450px, 56px, 0);
+        animation: glitch-anim-2 5s infinite linear alternate-reverse;
+    }
+
+    @keyframes glitch-anim-1 {
+        0% {
+            clip: rect(30px, 9999px, 10px, 0);
+        }
+        20% {
+            clip: rect(80px, 9999px, 90px, 0);
+        }
+        40% {
+            clip: rect(10px, 9999px, 50px, 0);
+        }
+        60% {
+            clip: rect(60px, 9999px, 20px, 0);
+        }
+        80% {
+            clip: rect(120px, 9999px, 10px, 0);
+        }
+        100% {
+            clip: rect(30px, 9999px, 70px, 0);
+        }
+    }
+
+    @keyframes glitch-anim-2 {
+        0% {
+            clip: rect(10px, 9999px, 80px, 0);
+        }
+        20% {
+            clip: rect(90px, 9999px, 10px, 0);
+        }
+        40% {
+            clip: rect(60px, 9999px, 5px, 0);
+        }
+        60% {
+            clip: rect(20px, 9999px, 100px, 0);
+        }
+        80% {
+            clip: rect(10px, 9999px, 40px, 0);
+        }
+        100% {
+            clip: rect(50px, 9999px, 80px, 0);
+        }
+    }
+
+    @keyframes glitch-skew {
+        0% {
+            transform: skew(0deg);
+        }
+        20% {
+            transform: skew(-2deg);
+        }
+        40% {
+            transform: skew(2deg);
+        }
+        60% {
+            transform: skew(0deg);
+        }
+        80% {
+            transform: skew(-1deg);
+        }
+        100% {
+            transform: skew(1deg);
+        }
+    }
+</style>

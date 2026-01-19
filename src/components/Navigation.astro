@@ -1,0 +1,374 @@
+---
+import { Image } from "astro:assets";
+import logoImage from "../assets/logo.png";
+---
+
+<nav class="nav-container">
+    <div class="nav-content">
+        <div class="nav-blobs">
+            <div class="blob blob-1"></div>
+            <div class="blob blob-2"></div>
+            <div class="blob blob-3"></div>
+        </div>
+        <a href="/" class="logo">
+            <Image
+                src={logoImage}
+                alt="Nony.cc"
+                width={36}
+                height={36}
+                loading="eager"
+            />
+        </a>
+        <div class="links">
+            <a href="/projects" class="nav-link">
+                <i class="fi fi-rr-code-simple"></i>
+                <span>Projects</span>
+            </a>
+            <a href="/writing" class="nav-link">
+                <i class="fi fi-rr-edit"></i>
+                <span>Writing</span>
+            </a>
+            <a href="/blog" class="nav-link">
+                <i class="fi fi-rr-book-alt"></i>
+                <span>Blog</span>
+            </a>
+            <a href="/rants" class="nav-link">
+                <i class="fi fi-rr-megaphone"></i>
+                <span>Rants</span>
+            </a>
+            <a href="/uses" class="nav-link">
+                <i class="fi fi-rr-computer"></i>
+                <span>Uses</span>
+            </a>
+            <button
+                id="theme-toggle"
+                class="nav-link icon-only"
+                aria-label="Toggle Theme"
+            >
+                <i class="fi fi-rr-moon-stars" id="theme-icon"></i>
+            </button>
+        </div>
+    </div>
+</nav>
+
+<script is:inline>
+    const STORAGE_KEY = "nony-theme-v2";
+
+    const theme = (() => {
+        if (
+            typeof localStorage !== "undefined" &&
+            localStorage.getItem(STORAGE_KEY)
+        ) {
+            return localStorage.getItem(STORAGE_KEY);
+        }
+        return "dark"; // Default to dark
+    })();
+
+    if (theme === "dark") {
+        document.documentElement.classList.add("dark");
+    } else {
+        document.documentElement.classList.remove("dark");
+    }
+
+    window.localStorage.setItem(STORAGE_KEY, theme);
+
+    document.addEventListener("astro:page-load", () => {
+        const handleToggleClick = () => {
+            const element = document.documentElement;
+            element.classList.toggle("dark");
+
+            const isDark = element.classList.contains("dark");
+            localStorage.setItem(STORAGE_KEY, isDark ? "dark" : "light");
+
+            updateIcon(isDark);
+        };
+
+        const updateIcon = (isDark) => {
+            const icon = document.getElementById("theme-icon");
+            if (icon) {
+                // Moon = Dark Mode Active (to toggle to light, show Sun? Or show Moon to indicate we are in Dark?)
+                // Usually: Show Sun if Dark (to switch to Light). Show Moon if Light (to switch to Dark).
+                // Existing logic: current is 'ti-moon'. logic was: remove isDark?moon:sun add isDark?sun:moon
+                // If isDark=true, remove 'ti-moon', add 'ti-sun'. Correct.
+                icon.classList.remove(
+                    isDark ? "fi-rr-moon-stars" : "fi-rr-sun",
+                );
+                icon.classList.add(isDark ? "fi-rr-sun" : "fi-rr-moon-stars");
+            }
+        };
+
+        const toggle = document.getElementById("theme-toggle");
+        if (toggle) {
+            /* Remove any existing listeners by cloning (optional but safe) */
+            const newToggle = toggle.cloneNode(true);
+            toggle.parentNode.replaceChild(newToggle, toggle);
+            newToggle.addEventListener("click", handleToggleClick);
+
+            updateIcon(document.documentElement.classList.contains("dark"));
+        }
+    });
+
+    document.addEventListener("astro:after-swap", () => {
+        // Re-apply theme on navigation to prevent flashing
+        if (localStorage.getItem(STORAGE_KEY) === "light") {
+            document.documentElement.classList.remove("dark");
+        } else {
+            // Default is dark
+            document.documentElement.classList.add("dark");
+        }
+    });
+</script>
+
+<style>
+    .nav-container {
+        position: fixed;
+        top: 2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10000;
+        display: flex;
+        justify-content: center;
+        width: auto;
+    }
+
+    .nav-content {
+        position: relative;
+        background: rgba(255, 255, 255, 0.4); /* Much more transparent */
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        box-shadow:
+            0 20px 40px rgba(0, 0, 0, 0.05),
+            inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+        padding: 0.5rem 0.8rem;
+        border-radius: 100px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        overflow: hidden; /* Mask the blobs */
+    }
+
+    /* ALWAYS WHITE MODE - No Dark Mode Overrides for Background */
+    :global(.dark) .nav-content {
+        background: rgba(255, 255, 255, 0.15); /* Slightly visible in dark */
+        border-color: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    /* BLOBS */
+    .nav-blobs {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        z-index: -1;
+        opacity: 0.6;
+    }
+
+    .blob {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(15px);
+        animation-fill-mode: both;
+        opacity: 0.8;
+    }
+
+    .blob-1 {
+        width: 60px;
+        height: 60px;
+        background: #ff0080; /* Pink */
+        top: -20px;
+        left: 10%;
+        animation: snap-move-1 8s infinite ease-out;
+    }
+
+    .blob-2 {
+        width: 50px;
+        height: 50px;
+        background: #7928ca; /* Purple */
+        bottom: -20px;
+        right: 10%;
+        animation: snap-move-2 7s infinite ease-out 1s;
+    }
+
+    .blob-3 {
+        width: 40px;
+        height: 40px;
+        background: #0070f3; /* Blue */
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        animation: snap-move-3 10s infinite ease-out 2s;
+    }
+
+    @keyframes snap-move-1 {
+        0% {
+            transform: translate(0, 0) scale(1);
+        }
+        25% {
+            transform: translate(150px, 30px) scale(1.2);
+        }
+        50% {
+            transform: translate(50px, 50px) scale(0.8);
+        }
+        75% {
+            transform: translate(-20px, 20px) scale(1.1);
+        }
+        100% {
+            transform: translate(0, 0) scale(1);
+        }
+    }
+
+    @keyframes snap-move-2 {
+        0% {
+            transform: translate(0, 0) scale(1);
+        }
+        30% {
+            transform: translate(-100px, -20px) scale(1.3);
+        }
+        60% {
+            transform: translate(-50px, -40px) scale(0.9);
+        }
+        90% {
+            transform: translate(20px, -10px) scale(1.1);
+        }
+        100% {
+            transform: translate(0, 0) scale(1);
+        }
+    }
+
+    @keyframes snap-move-3 {
+        0% {
+            transform: translate(-50%, -50%) scale(1);
+        }
+        20% {
+            transform: translate(-150%, -20%) scale(1.5);
+        }
+        40% {
+            transform: translate(50%, -80%) scale(0.8);
+        }
+        60% {
+            transform: translate(100%, 0%) scale(1.2);
+        }
+        80% {
+            transform: translate(-100%, 50%) scale(0.9);
+        }
+        100% {
+            transform: translate(-50%, -50%) scale(1);
+        }
+    }
+
+    .nav-content:hover {
+        transform: scale(1.02);
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Logo Hardening */
+    .logo {
+        display: flex;
+        align-items: center;
+        margin-right: 1rem;
+        border-right: 1px solid rgba(0, 0, 0, 0.1);
+        padding-right: 1rem;
+        flex-shrink: 0;
+        z-index: 2;
+    }
+    :global(.dark) .logo {
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .logo img {
+        height: 36px !important;
+        width: 36px !important;
+        min-width: 36px;
+        border-radius: 50%;
+        transition: transform 0.3s ease;
+        object-fit: cover;
+    }
+    .logo:hover img {
+        transform: scale(1.1);
+    }
+
+    .links {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        z-index: 2;
+        position: relative;
+    }
+
+    .nav-link {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #000; /* FORCE BLACK TEXT IN LIGHT MODE */
+        padding: 0.6rem 1.2rem;
+        border-radius: 50px;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        position: relative;
+        line-height: 1;
+    }
+
+    /* Force White Text in Dark Mode due to transparency, but keep glass feel */
+    :global(.dark) .nav-link {
+        color: #fff;
+    }
+
+    .nav-link i {
+        font-size: 1.1rem;
+        opacity: 0.7;
+        display: flex;
+        align-items: center;
+        height: 1.1rem; /* Fix alignment */
+    }
+
+    .nav-link:hover {
+        background: rgba(255, 255, 255, 0.8);
+        color: black;
+    }
+    :global(.dark) .nav-link:hover {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+    }
+
+    .nav-link:hover i {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+
+    .icon-only {
+        padding: 0;
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        aspect-ratio: 1;
+    }
+
+    /* Theme Toggle */
+    :global(.dark) #theme-toggle {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fbbf24;
+    }
+    :global(.dark) #theme-toggle:hover {
+        background: rgba(255, 255, 255, 0.3);
+        color: #fff;
+    }
+
+    @media (max-width: 650px) {
+        .logo {
+            margin-right: 0.5rem;
+            padding-right: 0.5rem;
+        }
+        .nav-link span {
+            display: none;
+        }
+        .nav-link {
+            padding: 0.6rem;
+        }
+    }
+</style>

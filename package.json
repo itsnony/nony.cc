@@ -1,0 +1,18 @@
+{
+  "name": "nony.cc",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/vercel": "^9.0.4",
+    "@flaticon/flaticon-uicons": "^3.3.1",
+    "@phosphor-icons/web": "^2.1.2",
+    "astro": "^5.16.10",
+    "vercel": "^50.4.5"
+  }
+}

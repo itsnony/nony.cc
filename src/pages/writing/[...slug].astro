@@ -1,0 +1,205 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { getCollection } from "astro:content";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("writing");
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await post.render();
+---
+
+<Layout title={post.data.title}>
+  <main class="article-container">
+    <a href="/writing" class="back-link"
+      ><i class="fi fi-rr-arrow-left"></i> Back to Archives</a
+    >
+
+    <header class="article-header">
+      <div class="header-content">
+        <span class="type-badge">{post.data.type || "Writing"}</span>
+        <h1>{post.data.title}</h1>
+        {post.data.excerpt && <p class="excerpt">{post.data.excerpt}</p>}
+
+        <div class="meta-row">
+          <div class="meta">
+            <span
+              ><i class="fi fi-rr-calendar"></i>
+              {post.data.date.toLocaleDateString()}</span
+            >
+            {
+              post.data.status && (
+                <span>
+                  <i class="fi fi-rr-info" /> {post.data.status}
+                </span>
+              )
+            }
+            <span><i class="fi fi-rr-clock"></i> Read</span>
+          </div>
+
+          {
+            post.data.fullLink && (
+              <a
+                href={post.data.fullLink}
+                target="_blank"
+                class="btn-read-full"
+              >
+                Read Full Version <i class="fi fi-rr-arrow-right" />
+              </a>
+            )
+          }
+        </div>
+      </div>
+    </header>
+
+    <article class="prose">
+      <Content />
+    </article>
+  </main>
+</Layout>
+
+<style>
+  .article-container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 8rem 2rem 6rem;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: "Fira Code", monospace;
+    font-size: 0.9rem;
+    color: var(--color-text-light);
+    text-decoration: none;
+    margin-bottom: 3rem;
+    transition: color 0.2s;
+    line-height: 1;
+  }
+  .back-link i {
+    display: inline-block;
+    line-height: 0;
+  }
+  .back-link:hover {
+    color: var(--color-primary);
+  }
+
+  .article-header {
+    text-align: center;
+    margin-bottom: 5rem;
+    position: relative;
+  }
+
+  .type-badge {
+    font-family: "Fira Code", monospace;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-primary);
+    margin-bottom: 1rem;
+    display: inline-block;
+  }
+
+  .article-header h1 {
+    font-family: "Fraunces", serif;
+    font-size: 4rem;
+    line-height: 1;
+    margin: 0 0 1.5rem 0;
+    font-weight: 700;
+  }
+
+  .excerpt {
+    font-family: "Crimson Text", serif;
+    font-size: 1.5rem;
+    font-style: italic;
+    color: var(--color-text-light);
+    max-width: 600px;
+    margin: 0 auto 2.5rem;
+    line-height: 1.6;
+  }
+
+  .meta-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .meta {
+    font-family: "Fira Code", monospace;
+    font-size: 0.85rem;
+    opacity: 0.6;
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .meta span {
+    display: inline-flex; /* Fix vertical alignment */
+    align-items: center;
+    gap: 0.5rem;
+    line-height: 1;
+  }
+  .meta span i {
+    display: inline-flex;
+    align-items: center;
+    line-height: 0;
+  }
+
+  .btn-read-full {
+    background: var(--color-text);
+    color: var(--color-bg);
+    padding: 0.8rem 2rem;
+    border-radius: 50px;
+    text-decoration: none;
+    font-family: "Outfit", sans-serif;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+  }
+  :global(.dark) .btn-read-full {
+    background: white;
+    color: black;
+  }
+  .btn-read-full:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .prose {
+    font-family: "Crimson Text", serif;
+    font-size: 1.35rem;
+    line-height: 1.8;
+    color: var(--color-text);
+  }
+
+  /* Markdown Styles */
+  .prose :global(p) {
+    margin-bottom: 1.5rem;
+  }
+  .prose :global(h2) {
+    font-family: "Fraunces", serif;
+    font-size: 2rem;
+    margin: 3rem 0 1rem;
+  }
+  .prose :global(blockquote) {
+    border-left: 4px solid var(--color-primary);
+    padding-left: 1.5rem;
+    margin: 2rem 0;
+    font-style: italic;
+    opacity: 0.8;
+  }
+  .prose :global(img) {
+    width: 100%;
+    border-radius: 8px;
+    margin: 2rem 0;
+  }
+</style>

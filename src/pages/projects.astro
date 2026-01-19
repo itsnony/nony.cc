@@ -1,0 +1,248 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { getCollection } from "astro:content";
+
+const projects = (await getCollection("projects")).sort(
+    (a, b) => a.data.order - b.data.order,
+);
+---
+
+<Layout title="Projects | Nony">
+    <div class="blob-cont">
+        <div class="blob-shape blob-1"></div>
+        <div class="blob-shape blob-2"></div>
+    </div>
+
+    <main class="wrapper">
+        <header class="page-header">
+            <h1>The <span class="highlight">Lab</span></h1>
+            <p>Experiments, hacks, and open source chaos.</p>
+        </header>
+
+        <div class="projects-grid">
+            {
+                projects.map((project) => (
+                    <a href={project.data.link} class="project-glass-card">
+                        <div class="glass-content">
+                            <div class="project-icon">
+                                <i class={project.data.icon} />
+                            </div>
+                            <div class="project-meta">
+                                <h3>{project.data.title}</h3>
+                                <p class="desc">{project.data.description}</p>
+                                <div class="tech-stack">
+                                    {project.data.tech.map((t) => (
+                                        <span>{t}</span>
+                                    ))}
+                                </div>
+                            </div>
+                            <div class="year">{project.data.year}</div>
+                        </div>
+                        <div class="glass-glow" />
+                    </a>
+                ))
+            }
+        </div>
+    </main>
+</Layout>
+
+<style>
+    main {
+        padding-top: 8rem;
+    }
+
+    /* Blobs (Restored) */
+    .blob-cont {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+    }
+    .blob-1 {
+        top: 10%;
+        right: -5%;
+        width: 600px;
+        height: 600px;
+        background: var(--color-blob-1);
+        opacity: 0.5;
+        animation: float 10s ease-in-out infinite;
+    }
+    .blob-2 {
+        bottom: 0%;
+        left: -10%;
+        width: 700px;
+        height: 700px;
+        background: var(--color-blob-3);
+        opacity: 0.5;
+        animation: float 12s ease-in-out infinite reverse;
+    }
+
+    @keyframes float {
+        0%,
+        100% {
+            transform: translate(0, 0);
+        }
+        50% {
+            transform: translate(30px, -30px);
+        }
+    }
+
+    .page-header {
+        margin-bottom: 5rem;
+        text-align: center;
+    }
+    .highlight {
+        font-family: "Fira Code", monospace;
+        color: var(--color-primary);
+        font-style: normal;
+        background: linear-gradient(
+            120deg,
+            var(--color-primary),
+            var(--color-secondary)
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .projects-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 2rem;
+    }
+
+    /* Glass Tech Card */
+    .project-glass-card {
+        position: relative;
+        display: block;
+        text-decoration: none;
+        color: var(--color-text);
+        border-radius: 24px;
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        overflow: hidden;
+    }
+
+    .glass-content {
+        background: rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        padding: 2rem;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        border-radius: 24px;
+        position: relative;
+        z-index: 2;
+        transition: all 0.3s ease;
+    }
+
+    .project-links a {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        color: var(--color-text);
+        text-decoration: none;
+        font-size: 0.9rem;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+        line-height: 1;
+    }
+    .project-links a i {
+        display: inline-flex;
+        align-items: center;
+        line-height: 0;
+    }
+
+    /* Dark Mode specific */
+    :global(.dark) .glass-content {
+        background: rgba(30, 30, 30, 0.4);
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .project-glass-card:hover .glass-content {
+        background: rgba(255, 255, 255, 0.6);
+        transform: translateY(-5px);
+        border-color: var(--color-primary);
+    }
+    :global(.dark) .project-glass-card:hover .glass-content {
+        background: rgba(40, 40, 40, 0.6);
+    }
+
+    .project-icon {
+        font-size: 2rem;
+        color: var(--color-text);
+        background: rgba(255, 255, 255, 0.5);
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 14px;
+    }
+    :global(.dark) .project-icon {
+        background: rgba(0, 0, 0, 0.2);
+    }
+
+    .project-meta h3 {
+        font-size: 1.4rem;
+        margin: 0 0 0.5rem 0;
+        font-weight: 700;
+        font-family: var(--font-heading);
+    }
+
+    .desc {
+        font-size: 1rem;
+        color: var(--color-text-light);
+        line-height: 1.5;
+        margin-bottom: 1.5rem;
+    }
+
+    .tech-stack {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .tech-stack span {
+        font-family: "Fira Code", monospace;
+        font-size: 0.75rem;
+        padding: 0.3rem 0.6rem;
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 6px;
+        font-weight: 600;
+    }
+    :global(.dark) .tech-stack span {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .year {
+        position: absolute;
+        top: 2rem;
+        right: 2rem;
+        font-family: "Fira Code", monospace;
+        color: var(--color-text-light);
+        opacity: 0.5;
+    }
+
+    .glass-glow {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(
+            circle at 50% 0%,
+            var(--color-primary),
+            transparent 70%
+        );
+        opacity: 0;
+        transition: opacity 0.5s ease;
+        z-index: 1;
+        filter: blur(20px);
+    }
+
+    .project-glass-card:hover .glass-glow {
+        opacity: 0.15;
+    }
+</style>

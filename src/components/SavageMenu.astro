@@ -1,0 +1,148 @@
+---
+import config from "../config.json";
+
+// Pass messages to client side
+const messages = config.savageMessages;
+---
+
+<div id="savage-menu" class="hidden" data-messages={JSON.stringify(messages)}>
+    <div class="menu-content">
+        <div class="icon"><i class="fi fi-rr-cross-circle"></i></div>
+        <p id="savage-msg">Nice try.</p>
+    </div>
+</div>
+
+<script>
+    // Inline protection logic - no external import needed
+
+    function initSavageMenu() {
+        // Disable on localhost for debugging
+        if (
+            window.location.hostname === "localhost" ||
+            window.location.hostname === "127.0.0.1"
+        ) {
+            return;
+        }
+
+        const menu = document.getElementById("savage-menu");
+        const msgEl = document.getElementById("savage-msg");
+        const messagesData = menu?.dataset.messages;
+
+        if (!menu || !msgEl || !messagesData) return;
+
+        const messages = JSON.parse(messagesData);
+
+        const showMenu = (
+            e: MouseEvent | KeyboardEvent,
+            customMsg: string | null = null,
+        ) => {
+            e.preventDefault();
+            msgEl.innerText =
+                customMsg ||
+                messages[Math.floor(Math.random() * messages.length)];
+
+            // Position with boundary check
+            let x = 0;
+            let y = 0;
+
+            if (e instanceof MouseEvent) {
+                x = e.clientX;
+                y = e.clientY;
+            } else {
+                // Center for keyboard events
+                x = window.innerWidth / 2;
+                y = window.innerHeight / 2;
+            }
+
+            // Simple boundary check
+            if (x + 200 > window.innerWidth) x = window.innerWidth - 220;
+            if (y + 100 > window.innerHeight) y = window.innerHeight - 120;
+
+            menu.style.left = `${x}px`;
+            menu.style.top = `${y}px`;
+
+            menu.classList.remove("hidden");
+            menu.classList.add("visible");
+        };
+
+        const hideMenu = () => {
+            menu.classList.remove("visible");
+            menu.classList.add("hidden");
+        };
+
+        // Right Click
+        document.addEventListener("contextmenu", (e) => showMenu(e));
+
+        // Click / Scroll to hide
+        document.addEventListener("click", hideMenu);
+        document.addEventListener("scroll", hideMenu);
+
+        // DevTools Protection
+        document.addEventListener("keydown", (e) => {
+            // F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+            if (
+                e.key === "F12" ||
+                ((e.ctrlKey || e.metaKey) &&
+                    e.shiftKey &&
+                    (e.key === "I" || e.key === "J" || e.key === "C")) ||
+                ((e.ctrlKey || e.metaKey) && e.key === "U")
+            ) {
+                showMenu(e, "Nice try, hacker.");
+            }
+        });
+    }
+
+    // Run on initial load
+    initSavageMenu();
+
+    // Run on subsequent navigations (View Transitions)
+    document.addEventListener("astro:page-load", initSavageMenu);
+</script>
+
+<style>
+    #savage-menu {
+        position: fixed;
+        z-index: 99999;
+        pointer-events: none;
+        transform: scale(0.9);
+        opacity: 0;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    #savage-menu.visible {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    .menu-content {
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 0.8rem 1.2rem;
+        border-radius: 12px;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        min-width: 150px;
+    }
+
+    :global(html:not(.dark)) .menu-content {
+        background: rgba(255, 255, 255, 0.8);
+        color: black;
+        border-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .icon {
+        font-size: 1.2rem;
+    }
+    p {
+        margin: 0;
+        font-family: "Fira Code", monospace;
+        font-size: 0.9rem;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+</style>

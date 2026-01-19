@@ -1,0 +1,154 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { getCollection } from "astro:content";
+
+const rants = (await getCollection("rants")).sort(
+    (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+---
+
+<Layout title="Rants | Nony">
+    <div class="blob-cont">
+        <div class="blob-shape blob-rage"></div>
+    </div>
+
+    <main class="wrapper">
+        <header class="page-header">
+            <h1>Rants<span class="dot">.</span></h1>
+            <p>Opinions, mostly.</p>
+        </header>
+
+        <div class="rant-list">
+            {
+                rants.map((rant) => (
+                    <a href={`/rants/${rant.slug}`} class="rant-row">
+                        <span class="date">
+                            {rant.data.date.toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                            })}
+                        </span>
+                        <div class="rant-info">
+                            <h2>{rant.data.title}</h2>
+                            <span class="read-link">Read</span>
+                        </div>
+                    </a>
+                ))
+            }
+        </div>
+    </main>
+</Layout>
+
+<style>
+    main {
+        padding-top: 8rem;
+        max-width: 700px;
+        margin: 0 auto;
+        padding-bottom: 4rem;
+    }
+
+    /* RED BLOB FOR RAGE */
+    .blob-cont {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+    }
+    .blob-rage {
+        top: 20%;
+        right: 10%;
+        width: 600px;
+        height: 600px;
+        background: #ef4444;
+        opacity: 0.1;
+        filter: blur(100px);
+    }
+
+    .page-header {
+        margin-bottom: 5rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        padding-bottom: 2rem;
+    }
+    :global(.dark) .page-header {
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    h1 {
+        font-size: 4rem;
+        margin: 0;
+        font-family: "Fraunces", serif;
+        line-height: 1;
+    }
+    .dot {
+        color: #ef4444;
+    }
+    p {
+        color: var(--color-text-light);
+        font-size: 1.1rem;
+        font-family: "Fira Code", monospace;
+        margin-top: 0.5rem;
+    }
+
+    .rant-list {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .rant-row {
+        display: flex;
+        align-items: baseline;
+        gap: 2rem;
+        padding: 2rem 0;
+        text-decoration: none;
+        color: var(--color-text);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        transition: all 0.2s ease;
+    }
+    :global(.dark) .rant-row {
+        border-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .rant-row:hover {
+        padding-left: 1rem;
+    }
+
+    .date {
+        font-family: "Fira Code", monospace;
+        font-size: 0.9rem;
+        color: var(--color-text-light);
+        width: 80px;
+        flex-shrink: 0;
+    }
+
+    .rant-info {
+        flex-grow: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+    }
+
+    h2 {
+        font-size: 1.8rem;
+        margin: 0;
+        font-family: "Fraunces", serif;
+        font-weight: 400;
+        transition: color 0.2s;
+    }
+
+    .read-link {
+        font-family: "Fira Code", monospace;
+        font-size: 0.8rem;
+        opacity: 0;
+        transform: translateX(-10px);
+        transition: all 0.2s;
+        color: #ef4444;
+    }
+
+    .rant-row:hover h2 {
+        color: #ef4444;
+    }
+    .rant-row:hover .read-link {
+        opacity: 1;
+        transform: translateX(0);
+    }
+</style>

@@ -1,0 +1,162 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { getCollection } from "astro:content";
+
+const tracks = await getCollection("music");
+---
+
+<Layout title="Music | Nony">
+    <div class="blob-cont">
+        <div class="blob-shape blob-1"></div>
+        <div class="blob-shape blob-2"></div>
+    </div>
+
+    <main class="wrapper">
+        <header class="page-header">
+            <h1>My <span class="highlight">Rotation</span></h1>
+            <p>A collection of sounds I make when code breaks.</p>
+        </header>
+
+        <div class="shelf-container">
+            {
+                tracks.map((track) => (
+                    <a href={track.data.link} class="album-spine">
+                        <div
+                            class="cd-case"
+                            style={`background: linear-gradient(135deg, ${track.data.coverColor}, #fff)`}
+                        >
+                            <div class="disc-center" />
+                            <div class="glare" />
+                        </div>
+                        <div class="track-meta">
+                            <h3>{track.data.title}</h3>
+                            <span class="genre">{track.data.genre}</span>
+                        </div>
+                    </a>
+                ))
+            }
+
+            <!-- Filler decorative items -->
+            <div class="album-spine filler"></div>
+            <div class="album-spine filler" style="height: 180px;"></div>
+        </div>
+    </main>
+</Layout>
+
+<style>
+    main {
+        padding-top: 8rem;
+    }
+
+    /* Background Blobs */
+    .blob-cont {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+    }
+    .blob-1 {
+        bottom: -10%;
+        left: -10%;
+        width: 600px;
+        height: 600px;
+        background: var(--color-blob-3);
+    }
+    .blob-2 {
+        top: -10%;
+        right: -10%;
+        width: 500px;
+        height: 500px;
+        background: var(--color-blob-5);
+    }
+
+    .page-header {
+        margin-bottom: 4rem;
+        text-align: center;
+    }
+    .highlight {
+        color: var(--color-primary);
+        font-style: italic;
+        font-family: var(--font-heading);
+    }
+
+    /* SHELF LAYOUT */
+    .shelf-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 3rem;
+        justify-content: center;
+        align-items: flex-end;
+        padding-bottom: 2rem;
+        border-bottom: 4px solid var(--color-border);
+    }
+
+    .album-spine {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        width: 200px;
+    }
+
+    .album-spine:hover {
+        transform: translateY(-20px) scale(1.05);
+    }
+
+    .cd-case {
+        width: 200px;
+        height: 200px;
+        border-radius: 4px;
+        box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.1);
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        overflow: hidden;
+    }
+
+    .disc-center {
+        width: 40px;
+        height: 40px;
+        background: white;
+        border-radius: 50%;
+        border: 2px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .glare {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            120deg,
+            rgba(255, 255, 255, 0) 40%,
+            rgba(255, 255, 255, 0.4) 50%,
+            rgba(255, 255, 255, 0) 60%
+        );
+    }
+
+    .track-meta {
+        text-align: center;
+    }
+    .track-meta h3 {
+        font-size: 1.1rem;
+        margin: 0;
+        line-height: 1.2;
+    }
+    .genre {
+        font-size: 0.85rem;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-top: 0.3rem;
+        display: block;
+    }
+
+    .filler {
+        width: 20px;
+        height: 190px;
+        background: #ddd;
+        border-radius: 2px;
+        opacity: 0.5;
+    }
+</style>

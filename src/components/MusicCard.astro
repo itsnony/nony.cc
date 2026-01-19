@@ -1,0 +1,97 @@
+---
+interface Props {
+  title: string;
+  genre: string;
+  link: string;
+  coverColor?: string;
+}
+
+const { title, genre, link, coverColor = '#FFB7B2' } = Astro.props;
+---
+
+<a href={link} class="record-container rotate-hover">
+  <div class="sleeve">
+    <div class="vinyl" style={`--center-color: ${coverColor};`}>
+      <div class="center-label"></div>
+    </div>
+    <div class="info">
+      <h3>{title}</h3>
+      <span class="genre">{genre}</span>
+    </div>
+  </div>
+</a>
+
+<style>
+  .record-container {
+    display: block;
+    width: 200px;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .sleeve {
+    background: white;
+    padding: 1rem;
+    border-radius: 4px;
+    box-shadow: var(--shadow-md);
+    background-image: linear-gradient(45deg, #fdfbf7 25%, #fff 25%, #fff 50%, #fdfbf7 50%, #fdfbf7 75%, #fff 75%, #fff 100%);
+    background-size: 20px 20px;
+  }
+
+  .vinyl {
+    width: 160px;
+    height: 160px;
+    background: #222;
+    border-radius: 50%;
+    margin: 0 auto 1rem;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 0 0 4px #111, 0 4px 10px rgba(0,0,0,0.3);
+    /* Groove texture */
+    background: repeating-radial-gradient(
+      #222,
+      #222 2px,
+      #111 3px,
+      #222 4px
+    );
+  }
+
+  .center-label {
+    width: 60px;
+    height: 60px;
+    background: var(--center-color);
+    border-radius: 50%;
+    position: relative;
+  }
+  
+  .center-label::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 6px;
+      height: 6px;
+      background: white;
+      border-radius: 50%;
+  }
+
+  .info {
+    text-align: center;
+  }
+
+  h3 {
+    font-size: 1.1rem;
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .genre {
+    font-size: 0.8rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+</style>

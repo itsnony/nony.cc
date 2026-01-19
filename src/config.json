@@ -1,0 +1,80 @@
+{
+    "site": {
+        "title": "Nony | Professional Hater",
+        "description": "Developer, Reverser, Hater.",
+        "url": "https://nony.cc"
+    },
+    "profile": {
+        "name": "Nony",
+        "tagline": "Professional Hater",
+        "location": "Germany",
+        "bio": "16 y/o Developer reversing printer drivers and breaking production.",
+        "minibio": "I have 24 domains because I make questionable financial decisions. Currently rewriting my entire OS because Next.js annoyed me.",
+        "status": "Compiling Rage...",
+        "image": "/nony.png",
+        "logo": "/logo.png"
+    },
+    "socials": {
+        "github": "https://github.com/itsnony",
+        "twitter": "https://twitter.com/itsnony",
+        "bluesky": "https://bsky.app/profile/itsnony.bsky.social",
+        "email": "hello@nony.cc",
+        "discord": "",
+        "linkedin": "",
+        "instagram": "",
+        "spotify": "",
+        "patreon": "https://patreon.com/itsnony"
+    },
+    "uses": {
+        "languages": [
+            "Node.js",
+            "Python (Reluctantly)"
+        ],
+        "frameworks": [
+            "Astro",
+            "React",
+            "Tailwind",
+            "Next.js (Hate)"
+        ],
+        "tools": [
+            "VSCode",
+            "Git",
+            "Docker",
+            "PostgreSQL",
+            "MongoDB"
+        ],
+        "os": [
+            "macOS",
+            "Ubuntu",
+            "Windows (Gaming only)"
+        ],
+        "services": [
+            "Vercel",
+            "Cloudflare",
+            "Stripe",
+            "Supabase"
+        ],
+        "fonts": [
+            "Google Fonts",
+            "Font Awesome",
+            "Phosphor Icons"
+        ],
+        "apps": [
+            "Obsidian",
+            "Discord"
+        ]
+    },
+    "savageMessages": [
+        "Nice try.",
+        "My divs, not yours.",
+        "Right click is illegal here.",
+        "Use F12 like a pro.",
+        "Source code is 500$ on Gumroad.",
+        "You clicked the wrong button.",
+        "Go away.",
+        "Don't touch my CSS.",
+        "403 Forbidden (Just kidding).",
+        "It's an NFT now.",
+        "This right click cost 0.001 ETH."
+    ]
+}

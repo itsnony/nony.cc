@@ -1,0 +1,180 @@
+---
+import { type CollectionEntry, getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog");
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: post,
+  }));
+}
+type Props = CollectionEntry<"blog">;
+
+const post = Astro.props;
+const { Content } = await post.render();
+---
+
+<Layout title={`${post.data.title} | Nony`}>
+  <main class="post-container">
+    <a href="/blog" class="back-link">
+      <i class="fi fi-rr-arrow-left"></i> Back to Blog
+    </a>
+
+    <article class="post-content">
+      <header class="post-header">
+        <div class="meta">
+          <time datetime={post.data.pubDate.toISOString()}>
+            {
+              post.data.pubDate.toLocaleDateString("en-us", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })
+            }
+          </time>
+        </div>
+        <h1>{post.data.title}</h1>
+        <div class="tags">
+          {post.data.tags?.map((tag) => <span class="tag">#{tag}</span>)}
+        </div>
+      </header>
+
+      <div class="prose">
+        <Content />
+      </div>
+    </article>
+  </main>
+</Layout>
+
+<style>
+  .post-container {
+    padding-top: 8rem;
+    max-width: 680px; /* Narrower for reading */
+    margin: 0 auto;
+    padding-bottom: 6rem;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-text-light);
+    text-decoration: none;
+    font-family: "Fira Code", monospace;
+    font-size: 0.9rem;
+    margin-bottom: 3rem;
+    transition: color 0.2s;
+    opacity: 0.7;
+  }
+  .back-link:hover {
+    color: var(--color-primary);
+    opacity: 1;
+  }
+
+  .post-header {
+    margin-bottom: 4rem;
+    text-align: center;
+  }
+
+  .meta {
+    color: var(--color-text-light);
+    font-family: "Fira Code", monospace;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+
+  h1 {
+    font-family: "Fraunces", serif;
+    font-size: 3.5rem;
+    line-height: 1.1;
+    margin: 0 0 1.5rem;
+  }
+
+  .tags {
+    display: flex;
+    justify-content: center;
+    gap: 0.8rem;
+  }
+
+  .tag {
+    font-family: "Fira Code", monospace;
+    font-size: 0.8rem;
+    color: var(--color-primary);
+    opacity: 0.8;
+  }
+
+  /* Editorial Prose Styling */
+  .prose {
+    font-family: "Crimson Text", serif;
+    font-size: 1.35rem; /* Large, comfortable reading size */
+    line-height: 1.7;
+    color: var(--color-text);
+  }
+
+  /* Markdown Styles */
+  .prose :global(p) {
+    margin-bottom: 1.8rem;
+  }
+
+  .prose :global(h2) {
+    font-family: "Fraunces", serif;
+    font-size: 2rem;
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+    color: var(--color-text);
+  }
+
+  .prose :global(h3) {
+    font-family: "Fraunces", serif;
+    font-size: 1.5rem;
+    margin-top: 2.5rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .prose :global(ul),
+  .prose :global(ol) {
+    margin-bottom: 1.8rem;
+    padding-left: 1.5rem;
+  }
+
+  .prose :global(li) {
+    margin-bottom: 0.5rem;
+  }
+
+  .prose :global(blockquote) {
+    border-left: 3px solid var(--color-primary);
+    margin: 2rem 0;
+    padding-left: 1.5rem;
+    font-style: italic;
+    color: var(--color-text-light);
+    font-size: 1.4rem;
+  }
+
+  .prose :global(a) {
+    color: var(--color-text);
+    text-decoration: underline;
+    text-decoration-color: var(--color-primary);
+    text-underline-offset: 3px;
+  }
+  .prose :global(a:hover) {
+    color: var(--color-primary);
+  }
+
+  .prose :global(img) {
+    max-width: 100%;
+    border-radius: 8px;
+    margin: 2rem 0;
+  }
+
+  .prose :global(code) {
+    font-family: "Fira Code", monospace;
+    font-size: 0.85em;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
+  }
+  :global(.dark) .prose :global(code) {
+    background: rgba(255, 255, 255, 0.1);
+  }
+</style>

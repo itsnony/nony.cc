@@ -1,0 +1,169 @@
+---
+import config from "../config.json";
+
+const { socials, profile } = config;
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="main-footer">
+    <div class="footer-content">
+        <div class="top-row">
+            <div class="links">
+                <a href="/projects">Projects</a>
+                <a href="/writing">Writing</a>
+                <a href="/blog">Blog</a>
+                <a href="/rants">Rants</a>
+                <a href="/uses">Uses</a>
+            </div>
+            <div class="socials">
+                {
+                    Object.entries(socials).map(([key, url]) => {
+                        if (!url) return null;
+
+                        // Icon Mapping (Flaticon Brands default, fallback to Globe)
+                        // Note: Email is special (fi-rr-envelope)
+                        let iconClass = "fi fi-rr-globe"; // Default fallback
+
+                        if (key === "email") iconClass = "fi fi-rr-envelope";
+                        else if (key === "github")
+                            iconClass = "fi fi-brands-github";
+                        else if (key === "twitter")
+                            iconClass = "fi fi-brands-twitter";
+                        else if (key === "linkedin")
+                            iconClass = "fi fi-brands-linkedin";
+                        else if (key === "instagram")
+                            iconClass = "fi fi-brands-instagram";
+                        else if (key === "spotify")
+                            iconClass = "fi fi-brands-spotify";
+                        else if (key === "discord")
+                            iconClass = "fi fi-brands-discord";
+                        else if (key === "patreon")
+                            iconClass = "fi fi-brands-patreon";
+                        else if (key === "bluesky")
+                            iconClass = "fa-brands fa-bluesky"; // Use Type 6.5.2+ Butterfly
+                        // Fallback
+
+                        const href = key === "email" ? `mailto:${url}` : url;
+
+                        return (
+                            <a
+                                href={href}
+                                target={key === "email" ? "_self" : "_blank"}
+                                aria-label={
+                                    key.charAt(0).toUpperCase() + key.slice(1)
+                                }
+                            >
+                                <i class={iconClass} />
+                            </a>
+                        );
+                    })
+                }
+            </div>
+        </div>
+
+        <div class="giant-wordmark">{profile.name.toUpperCase()}</div>
+
+        <div class="copyright">
+            &copy; {currentYear}
+            {profile.name} &bull; Built with ☕ and Hate.
+        </div>
+    </div>
+</footer>
+
+<style>
+    .main-footer {
+        padding: 4rem 2rem 1rem;
+        background: transparent;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        margin-top: 5rem;
+        overflow: hidden;
+    }
+    :global(.dark) .main-footer {
+        border-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .footer-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .top-row {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .links {
+        display: flex;
+        gap: 2rem;
+    }
+
+    .links a {
+        font-family: "Fira Code", monospace;
+        font-size: 0.9rem;
+        color: var(--color-text-light);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .links a:hover {
+        color: var(--color-primary);
+    }
+
+    .socials {
+        display: flex;
+        gap: 1.5rem;
+    }
+    .socials a {
+        font-size: 1.5rem;
+        color: var(--color-text);
+        opacity: 0.7;
+        transition: all 0.2s;
+    }
+    .socials a:hover {
+        opacity: 1;
+        transform: translateY(-3px);
+    }
+
+    .giant-wordmark {
+        font-family: "Fraunces", serif;
+        font-size: 15vw; /* FAST */
+        line-height: 0.8;
+        font-weight: 900;
+        color: rgba(0, 0, 0, 0.03);
+        letter-spacing: -0.05em;
+        user-select: none;
+        pointer-events: none;
+        text-align: center;
+        width: 100%;
+    }
+    :global(.dark) .giant-wordmark {
+        color: rgba(255, 255, 255, 0.03);
+    }
+
+    .copyright {
+        margin-top: 2rem;
+        font-size: 0.8rem;
+        color: var(--color-text-light);
+        opacity: 0.6;
+        font-family: "Outfit", sans-serif;
+    }
+
+    @media (max-width: 768px) {
+        .top-row {
+            flex-direction: column;
+            gap: 2rem;
+        }
+        .links {
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .giant-wordmark {
+            font-size: 25vw;
+        }
+    }
+</style>

@@ -1,0 +1,159 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { getCollection } from "astro:content";
+
+const posts = (await getCollection("blog")).sort(
+    (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+---
+
+<Layout title="Journal | Nony">
+    <div class="blob-cont">
+        <div class="blob-shape blob-1"></div>
+    </div>
+
+    <main class="wrapper">
+        <header class="journal-header">
+            <span class="vol">VOL. 1</span>
+            <h1>The <span class="highlight">Journal</span></h1>
+        </header>
+
+        <div class="journal-entries">
+            <div class="journal-list">
+                {
+                    posts.map((post) => (
+                        <a
+                            href={`/blog/${post.slug}`}
+                            class="journal-glass-item"
+                        >
+                            <div class="content">
+                                <span class="date">
+                                    {post.data.pubDate.toLocaleDateString(
+                                        "en-us",
+                                        { month: "short", day: "numeric" },
+                                    )}
+                                </span>
+                                <div class="main-info">
+                                    <h2>{post.data.title}</h2>
+                                    <p>{post.data.description}</p>
+                                </div>
+                            </div>
+                            <div class="action">
+                                <i class="fi fi-rr-arrow-right" />
+                            </div>
+                        </a>
+                    ))
+                }
+            </div>
+        </div>
+    </main>
+</Layout>
+
+<style>
+    main {
+        padding-top: 8rem;
+    }
+
+    /* Blobs */
+    .blob-cont {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+    }
+    .blob-1 {
+        top: 30%;
+        right: 10%;
+        width: 500px;
+        height: 500px;
+        background: var(--color-blob-3);
+        opacity: 0.4;
+        filter: blur(80px);
+    }
+
+    .journal-header {
+        text-align: center;
+        margin-bottom: 4rem;
+    }
+    .vol {
+        font-family: monospace;
+        letter-spacing: 0.2em;
+        color: var(--color-text-light);
+    }
+    .highlight {
+        color: var(--color-primary);
+        font-style: italic;
+    }
+
+    .journal-list {
+        max-width: 800px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .journal-glass-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 2rem;
+        background: rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 12px;
+        text-decoration: none;
+        color: var(--color-text);
+        transition: all 0.3s ease;
+    }
+
+    :global(.dark) .journal-glass-item {
+        background: rgba(30, 30, 30, 0.4);
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .journal-glass-item:hover {
+        background: rgba(255, 255, 255, 0.7);
+        transform: scale(1.02);
+        border-color: var(--color-primary);
+    }
+
+    .content {
+        display: flex;
+        gap: 2rem;
+        align-items: baseline;
+    }
+
+    .date {
+        font-family: "Fira Code", monospace;
+        font-size: 0.9rem;
+        color: var(--color-text-light);
+        min-width: 80px;
+    }
+
+    .main-info h2 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.4rem;
+        font-family: "Fraunces", serif;
+    }
+
+    .main-info p {
+        margin: 0;
+        color: var(--color-text-light);
+        font-family: "Crimson Text", serif;
+        font-size: 1.1rem;
+    }
+
+    .action {
+        color: var(--color-primary);
+        opacity: 0;
+        transform: translateX(-10px);
+        transition: all 0.2s;
+    }
+
+    .journal-glass-item:hover .action {
+        opacity: 1;
+        transform: translateX(0);
+    }
+</style>
