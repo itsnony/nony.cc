@@ -6,5 +6,5 @@ tech: ["Astro", "CSS Modules"]
 year: "2026"
 link: "https://github.com/itsnony/pawpatrolworld"
 featured: true
-order: 6
+order: 5
 ---
