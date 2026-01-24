@@ -1,0 +1,68 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Hall of Shame | Nony">
+  <main class="wrapper">
+    <header class="page-header">
+      <h1>The Hall of Shame<span class="dot">.</span></h1>
+      <p>These people are financially irresponsible.</p>
+    </header>
+
+    <div class="shame-list">
+      <div class="empty-state">
+        <i class="fi fi-rr-ghost"></i>
+        <h3>No one yet.</h3>
+        <p>Be the first to make a bad decision.</p>
+        <a href="/memberships" class="btn">Join the Board &rarr;</a>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .page-header {
+    margin: 8rem 0 4rem 0;
+    text-align: center;
+  }
+  h1 {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+    font-family: "Fraunces", serif;
+  }
+  .dot {
+    color: var(--color-primary);
+  }
+
+  .shame-list {
+    max-width: 600px;
+    margin: 0 auto;
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed var(--color-border);
+    border-radius: 20px;
+    background: rgba(0, 0, 0, 0.02);
+  }
+
+  .empty-state {
+    text-align: center;
+    opacity: 0.6;
+  }
+  .empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+  }
+  .empty-state h3 {
+    margin-bottom: 0.5rem;
+  }
+  .btn {
+    margin-top: 1.5rem;
+    display: inline-block;
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 700;
+  }
+</style>

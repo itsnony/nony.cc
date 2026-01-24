@@ -1,0 +1,65 @@
+<div id="flashbang"></div>
+
+<script>
+  // FLASHBANG & DEVTOOLS DETECTION
+  const flashbang = document.getElementById("flashbang");
+
+  // 1. Detect F12 / Cmd+Shift+I / Ctrl+Shift+I
+  document.addEventListener("keydown", (e) => {
+    if (
+      e.key === "F12" ||
+      (e.ctrlKey && e.shiftKey && e.key === "I") ||
+      (e.metaKey && e.altKey && e.key === "i")
+    ) {
+      triggerFlashbang();
+    }
+  });
+
+  // 2. Detect Resize (Console open usually resizes window significantly)
+  const threshold = 160;
+  // Simple check: if window outer width/height diff is large?
+  // Actually, reliable DevTools detection is hard.
+  // Let's stick to the debugger trap which is aggressive but effective.
+
+  // 3. Debugger Trap (The "Professional" way)
+  // Only run if NOT localhost to avoid annoying the dev (me/user)
+  if (
+    window.location.hostname !== "localhost" &&
+    window.location.hostname !== "127.0.0.1"
+  ) {
+    setInterval(() => {
+      const start = performance.now();
+      debugger;
+      const end = performance.now();
+      if (end - start > 100) {
+        triggerFlashbang();
+      }
+    }, 2000);
+  }
+
+  function triggerFlashbang() {
+    if (!flashbang) return;
+    flashbang.style.opacity = "1";
+    flashbang.style.pointerEvents = "all";
+
+    // Play sound? Nah, too annoying.
+
+    setTimeout(() => {
+      // Redirect or Troll
+      // window.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+      // Just clear it for now so they can't see the site
+    }, 1000);
+  }
+</script>
+
+<style>
+  #flashbang {
+    position: fixed;
+    inset: 0;
+    background: white;
+    z-index: 99999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.1s ease-out;
+  }
+</style>

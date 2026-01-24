@@ -1,4 +1,6 @@
 ---
+import { Image } from "astro:assets";
+import logoImage from "../assets/logo.png";
 import config from "../config.json";
 
 const { socials, profile } = config;
@@ -6,43 +8,35 @@ const currentYear = new Date().getFullYear();
 ---
 
 <footer class="main-footer">
-  <div class="footer-content">
-    <div class="top-row">
-      <div class="links">
-        <a href="/projects">Projects</a>
-        <a href="/writing">Writing</a>
-        <a href="/blog">Blog</a>
-        <a href="/rants">Rants</a>
-        <a href="/uses">Uses</a>
-        <a href="/changelog">Changelog</a>
-      </div>
+  <div class="footer-grid">
+    <!-- COL 1: IDENTITY -->
+    <div class="footer-col identity">
+      <a href="/" class="footer-logo">
+        <Image src={logoImage} alt="Nony" width={40} height={40} />
+        <span class="logo-text">NONY</span>
+      </a>
+      <p class="tagline">
+        "I turn coffee into code and anxiety into features."
+      </p>
       <div class="socials">
         {
           Object.entries(socials).map(([key, url]) => {
             if (!url) return null;
-
-            // Icon Mapping (Flaticon Brands default, fallback to Globe)
-            // Note: Email is special (fi-rr-envelope)
-            let iconClass = "fi fi-rr-globe"; // Default fallback
-
+            let iconClass = "fi fi-rr-globe";
             if (key === "email") iconClass = "fi fi-rr-envelope";
             else if (key === "github") iconClass = "fi fi-brands-github";
             else if (key === "twitter") iconClass = "fi fi-brands-twitter";
             else if (key === "linkedin") iconClass = "fi fi-brands-linkedin";
             else if (key === "instagram") iconClass = "fi fi-brands-instagram";
-            else if (key === "spotify") iconClass = "fi fi-brands-spotify";
             else if (key === "discord") iconClass = "fi fi-brands-discord";
-            else if (key === "patreon") iconClass = "fi fi-brands-patreon";
-            else if (key === "bluesky") iconClass = "fa-brands fa-bluesky"; // Use Type 6.5.2+ Butterfly
-            // Fallback
+            else if (key === "bluesky") iconClass = "fa-brands fa-bluesky";
 
             const href = key === "email" ? `mailto:${url}` : url;
-
             return (
               <a
                 href={href}
                 target={key === "email" ? "_self" : "_blank"}
-                aria-label={key.charAt(0).toUpperCase() + key.slice(1)}
+                aria-label={key}
               >
                 <i class={iconClass} />
               </a>
@@ -52,109 +46,130 @@ const currentYear = new Date().getFullYear();
       </div>
     </div>
 
-    <div class="giant-wordmark">{profile.name.toUpperCase()}</div>
-
-    <div class="copyright">
-      &copy; {currentYear}
-      {profile.name} &bull; Built with ☕ and Hate.
+    <!-- COL 2: SITEMAP -->
+    <div class="footer-col links">
+      <h4>EXPLORE</h4>
+      <a href="/projects">Projects</a>
+      <a href="/writing">Writing</a>
+      <a href="/blog">Blog</a>
+      <a href="/rants">Rants</a>
+      <a href="/uses">Uses</a>
     </div>
+
+    <!-- COL 3: SUPPORT -->
+    <div class="footer-col links">
+      <h4>SUPPORT</h4>
+      <a href="/donate">Donate</a>
+      <!-- Removing Sponsors as requested -->
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <span class="copyright">&copy; {currentYear} {profile.name}</span>
+    <span class="made-with">Built with Astro & Anxiety</span>
   </div>
 </footer>
 
 <style>
   .main-footer {
-    padding: 4rem 2rem 1rem;
-    background: transparent;
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
-    margin-top: 5rem;
-    overflow: hidden;
-  }
-  :global(.dark) .main-footer {
-    border-color: rgba(255, 255, 255, 0.05);
+    border-top: 1px solid var(--color-border);
+    margin-top: 6rem;
+    padding: 4rem 2rem 2rem 2rem;
+    background: var(--color-surface);
   }
 
-  .footer-content {
+  .footer-grid {
     max-width: 1200px;
     margin: 0 auto;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 4rem;
+    margin-bottom: 3rem;
+  }
+
+  /* COLUMNS */
+  .footer-col {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    gap: 1rem;
   }
 
-  .top-row {
-    width: 100%;
+  .footer-logo {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
+    gap: 0.8rem;
+    text-decoration: none;
+    color: var(--color-text);
+    font-size: 1.5rem;
+    font-weight: 900;
+    font-family: "Fira Code", monospace;
   }
 
-  .links {
-    display: flex;
-    gap: 2rem;
+  .tagline {
+    opacity: 0.6;
+    max-width: 300px;
+    line-height: 1.6;
+    font-size: 0.9rem;
+  }
+
+  h4 {
+    font-family: "Fira Code", monospace;
+    font-size: 0.8rem;
+    opacity: 0.5;
+    margin: 0 0 0.5rem 0;
+    letter-spacing: 1px;
   }
 
   .links a {
-    font-family: "Fira Code", monospace;
-    font-size: 0.9rem;
-    color: var(--color-text-light);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    text-decoration: none;
+    color: var(--color-text);
+    opacity: 0.8;
+    transition: all 0.2s;
+    font-size: 0.95rem;
   }
   .links a:hover {
+    opacity: 1;
+    transform: translateX(5px);
     color: var(--color-primary);
   }
 
   .socials {
     display: flex;
-    gap: 1.5rem;
+    gap: 1rem;
+    margin-top: 1rem;
   }
   .socials a {
-    font-size: 1.5rem;
     color: var(--color-text);
+    font-size: 1.2rem;
     opacity: 0.7;
-    transition: all 0.2s;
+    transition: transform 0.2s;
   }
   .socials a:hover {
     opacity: 1;
-    transform: translateY(-3px);
+    transform: translateY(-2px);
   }
 
-  .giant-wordmark {
-    font-family: "Fraunces", serif;
-    font-size: 15vw; /* FAST */
-    line-height: 0.8;
-    font-weight: 900;
-    color: rgba(0, 0, 0, 0.03);
-    letter-spacing: -0.05em;
-    user-select: none;
-    pointer-events: none;
-    text-align: center;
-    width: 100%;
-  }
-  :global(.dark) .giant-wordmark {
-    color: rgba(255, 255, 255, 0.03);
-  }
-
-  .copyright {
-    margin-top: 2rem;
-    font-size: 0.8rem;
-    color: var(--color-text-light);
+  .footer-bottom {
+    max-width: 1200px;
+    margin: 0 auto;
+    border-top: 1px solid var(--color-border);
+    padding-top: 2rem;
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
     opacity: 0.6;
-    font-family: "Outfit", sans-serif;
+    font-family: "Fira Code", monospace;
   }
 
   @media (max-width: 768px) {
-    .top-row {
-      flex-direction: column;
+    .footer-grid {
+      grid-template-columns: 1fr;
       gap: 2rem;
     }
-    .links {
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    .giant-wordmark {
-      font-size: 25vw;
+    .footer-bottom {
+      flex-direction: column;
+      gap: 1rem;
+      text-align: center;
     }
   }
 </style>

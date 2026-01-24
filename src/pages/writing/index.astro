@@ -3,140 +3,121 @@ import Layout from "../../layouts/Layout.astro";
 import { getCollection } from "astro:content";
 
 const posts = (await getCollection("writing")).sort(
-    (a, b) => (b.data.date?.valueOf() || 0) - (a.data.date?.valueOf() || 0),
+  (a, b) => (b.data.date?.valueOf() || 0) - (a.data.date?.valueOf() || 0),
 );
 ---
 
 <Layout title="Writing | Nony">
-    <main class="writing-container">
-        <header class="editorial-header">
-            <span class="sub">Stories & Essays</span>
-            <h1>The Archives</h1>
-        </header>
+  <main class="writing-container">
+    <header class="editorial-header">
+      <span class="sub">Stories & Essays</span>
+      <h1>The Archives</h1>
+    </header>
 
-        <section class="posts-list">
-            {
-                posts.map((post) => (
-                    <a href={`/writing/${post.slug}`} class="post-row">
-                        <span class="date">
-                            {post.data.date.toLocaleDateString()}
-                        </span>
-                        <div class="info">
-                            <h2>{post.data.title}</h2>
-                            <p>{post.data.description}</p>
-                        </div>
-                        <span class="arrow">
-                            <i class="fi fi-rr-arrow-right" />
-                        </span>
-                    </a>
-                ))
-            }
-        </section>
-    </main>
+    <div class="posts-list">
+      {
+        posts.map((post) => (
+          <a href={`/writing/${post.slug}`} class="post-item">
+            <span class="post-date">
+              {post.data.date.toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "short",
+              })}
+            </span>
+            <div class="post-content">
+              <h2>{post.data.title}</h2>
+              <p>{post.data.description}</p>
+            </div>
+          </a>
+        ))
+      }
+    </div>
+  </main>
 </Layout>
 
 <style>
-    .writing-container {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 8rem 2rem 4rem;
-    }
+  .writing-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 8rem 2rem 4rem;
+  }
 
-    .editorial-header {
-        margin-bottom: 5rem;
-        border-bottom: 2px solid var(--color-text);
-        padding-bottom: 2rem;
-    }
-    .sub {
-        display: block;
-        font-family: "Fira Code", monospace;
-        font-size: 0.9rem;
-        margin-bottom: 0.5rem;
-        opacity: 0.6;
-        text-transform: uppercase;
+  .editorial-header {
+    margin-bottom: 6rem;
+    text-align: center;
+  }
+  .sub {
+    font-family: "Fira Code", monospace;
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+    opacity: 0.5;
+    display: block;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+  }
+  .editorial-header h1 {
+    font-family: "Fraunces", serif;
+    font-size: 4rem;
+    font-weight: 300;
+    margin: 0;
+    font-style: italic;
+  }
+
+  .posts-list {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .post-item {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 2rem;
+    padding: 3rem 0;
+    border-bottom: 1px solid var(--color-border);
+    text-decoration: none;
+    color: var(--color-text);
+    transition: all 0.3s ease;
+  }
+
+  .post-item:hover {
+    background: rgba(125, 125, 125, 0.03);
+    padding-left: 2rem; /* Slide effect */
+    padding-right: 2rem;
+  }
+
+  .post-date {
+    font-family: "Fira Code", monospace;
+    font-size: 0.9rem;
+    opacity: 0.5;
+    padding-top: 0.5rem;
+  }
+
+  .post-content h2 {
+    font-family: "Fraunces", serif;
+    font-size: 1.8rem;
+    margin: 0 0 0.8rem 0;
+    transition: color 0.3s;
+  }
+  .post-item:hover h2 {
+    color: var(--color-primary);
+  }
+
+  .post-content p {
+    font-family: "Crimson Text", serif; /* Elegant reading font */
+    font-size: 1.1rem;
+    line-height: 1.6;
+    opacity: 0.7;
+    margin: 0;
+  }
+
+  @media (max-width: 600px) {
+    .post-item {
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
     }
     .editorial-header h1 {
-        font-family: "Fraunces", serif;
-        font-size: 4rem;
-        margin: 0;
-        line-height: 1;
+      font-size: 3rem;
     }
-
-    .posts-list {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .post-row {
-        display: flex;
-        align-items: baseline;
-        gap: 2rem;
-        padding: 2.5rem 0;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-        text-decoration: none;
-        color: var(--color-text);
-        transition: all 0.3s ease;
-        group: row;
-    }
-    :global(.dark) .post-row {
-        border-color: rgba(255, 255, 255, 0.1);
-    }
-
-    .post-row:hover {
-        padding-left: 1rem;
-        border-color: var(--color-primary);
-    }
-
-    .date {
-        font-family: "Fira Code", monospace;
-        font-size: 0.85rem;
-        opacity: 0.5;
-        width: 100px;
-        flex-shrink: 0;
-    }
-
-    .info {
-        flex-grow: 1;
-    }
-    .info h2 {
-        font-family: "Fraunces", serif;
-        font-size: 1.8rem;
-        margin: 0 0 0.5rem 0;
-        transition: color 0.3s;
-    }
-    .info p {
-        margin: 0;
-        font-size: 1rem;
-        opacity: 0.7;
-        font-family: "Crimson Text", serif;
-    }
-
-    .post-row:hover .info h2 {
-        color: var(--color-primary);
-    }
-
-    .arrow {
-        opacity: 0;
-        transform: translateX(-10px);
-        transition: all 0.3s;
-    }
-    .post-row:hover .arrow {
-        opacity: 1;
-        transform: translateX(0);
-    }
-
-    @media (max-width: 600px) {
-        .post-row {
-            flex-direction: column;
-            gap: 0.5rem;
-            align-items: flex-start;
-        }
-        .date {
-            width: auto;
-            margin-bottom: 0.5rem;
-        }
-        .arrow {
-            display: none;
-        }
-    }
+  }
 </style>

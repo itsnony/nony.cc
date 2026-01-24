@@ -1,0 +1,305 @@
+---
+import Layout from "../layouts/Layout.astro";
+import dbConnect from "../lib/mongodb";
+import Guestbook from "../models/Guestbook";
+
+// Fetch entries on build/server-render
+await dbConnect();
+const entries = await Guestbook.find({}).sort({ createdAt: -1 }).limit(50);
+
+// Handle POST request (Server Action style)
+if (Astro.request.method === "POST") {
+  try {
+    const data = await Astro.request.formData();
+    const name = data.get("name")?.toString() || "Anonymous";
+    let message = data.get("message")?.toString();
+
+    if (message) {
+      // Server-side enforcement of the Twist
+      if (message.toLowerCase().match(/next\.?js.*good/i)) {
+        message = "I am wrong and I apologize. Also I love PHP.";
+      }
+
+      await Guestbook.create({ name, message });
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
+---
+
+<Layout title="Guestbook | Nony">
+  <div class="blob-cont">
+    <div class="blob-shape blob-1"></div>
+    <div class="blob-shape blob-2"></div>
+  </div>
+
+  <main class="wrapper">
+    <header class="page-header">
+      <h1>Sign the Book<span class="dot">.</span></h1>
+      <p>Leave a mark. Don't be boring.</p>
+    </header>
+
+    <section class="guestbook-section">
+      <!-- FORM -->
+      <div class="glass-panel form-card">
+        <form method="POST">
+          <div class="input-group">
+            <input
+              type="text"
+              name="name"
+              id="name"
+              placeholder=" "
+              maxlength="50"
+            />
+            <label for="name">Name (Optional)</label>
+          </div>
+          <div class="input-group">
+            <textarea
+              name="message"
+              id="message"
+              placeholder=" "
+              required
+              maxlength="280"
+              rows="3"></textarea>
+            <label for="message">Message</label>
+          </div>
+          <button type="submit" class="btn btn-primary">
+            Sign <i class="fi fi-rr-pencil"></i>
+          </button>
+        </form>
+        {
+          Astro.request.method === "POST" && (
+            <div class="success-banner">
+              <i class="fi fi-rr-check" />
+              <span>Added to the Void.</span>
+            </div>
+          )
+        }
+      </div>
+
+      <!-- LIST -->
+      <div class="entries-masonry">
+        {
+          entries.map((entry: any) => (
+            <div class="entry-card">
+              <p class="entry-msg">"{entry.message}"</p>
+              <div class="entry-footer">
+                <span class="entry-name">— {entry.name}</span>
+                <span class="entry-date">
+                  {new Date(entry.createdAt).toLocaleDateString()}
+                </span>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+  </main>
+</Layout>
+
+<script>
+  // Client-Side Twist Logic
+  const messageInput = document.getElementById(
+    "message",
+  ) as HTMLTextAreaElement;
+
+  // Duplicate for client usage
+  const REPLACEMENTS = [
+    { pattern: "\\bnext\\.?js\\b", replacement: "Bloatware™" },
+    { pattern: "\\bvercel\\b", replacement: "The Overlords" },
+    { pattern: "\\breact\\b", replacement: "Spaghetti.js" },
+    { pattern: "\\bphp\\b", replacement: "The OG (Respect)" },
+    { pattern: "\\bjava\\b", replacement: "The Boilerplate Factory" },
+    { pattern: "\\bprinter\\b", replacement: "Paper Demon from Hell" },
+    { pattern: "\\bhp\\b", replacement: "Electronic Waste" },
+    { pattern: "\\bmoney\\b", replacement: "Dollarbucks (which I don't have)" },
+    { pattern: "\\bbudget\\b", replacement: "Bad Financial Decisions" },
+    { pattern: "\\bmacbook\\b", replacement: "Overpriced Windows Machine" },
+    {
+      pattern: "\\btouch grass\\b",
+      replacement: "Download Sidequest (Coming Soon)",
+    },
+    { pattern: "\\bhydration error\\b", replacement: "Skill Issue" },
+    { pattern: "\\bai\\b", replacement: "Magic Plagiarism" },
+    { pattern: "\\btwitter\\b", replacement: "The Bad Place" },
+    { pattern: "\\bcloud\\b", replacement: "Someone Else's Computer" },
+    {
+      pattern: "\\bserverless\\b",
+      replacement: "There Is Still A Server, You Just Can't SSH Into It",
+    },
+  ];
+
+  if (messageInput) {
+    messageInput.addEventListener("input", (e) => {
+      let val = messageInput.value;
+      let changed = false;
+
+      REPLACEMENTS.forEach((item) => {
+        const regex = new RegExp(item.pattern, "gi");
+        if (val.match(regex)) {
+          val = val.replace(regex, item.replacement);
+          changed = true;
+        }
+      });
+
+      // Special Case
+      if (val.toLowerCase().match(/next\.?js.*good/i)) {
+        val = "I am wrong and I apologize.";
+        changed = true;
+      }
+
+      if (changed) {
+        messageInput.value = val;
+        messageInput.style.color = "red";
+        setTimeout(() => (messageInput.style.color = ""), 500);
+      }
+    });
+  }
+</script>
+
+<style>
+  .page-header {
+    margin: 6rem 0 4rem 0;
+    text-align: center;
+  }
+  .page-header h1 {
+    font-size: 4rem;
+    margin-bottom: 0.5rem;
+  }
+  .dot {
+    color: var(--color-primary);
+  }
+
+  .guestbook-section {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .form-card {
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .input-group {
+    position: relative;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Floating Labels */
+  input,
+  textarea {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+    background: rgba(255, 255, 255, 0.5);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    color: var(--color-text);
+    transition: all 0.2s;
+  }
+  :global(.dark) input,
+  :global(.dark) textarea {
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  label {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    color: var(--color-text-light);
+    pointer-events: none;
+    transition: all 0.2s;
+    background: transparent;
+    padding: 0 0.2rem;
+  }
+
+  input:focus ~ label,
+  input:not(:placeholder-shown) ~ label,
+  textarea:focus ~ label,
+  textarea:not(:placeholder-shown) ~ label {
+    top: -0.6rem;
+    left: 0.8rem;
+    font-size: 0.8rem;
+    color: var(--color-primary);
+    font-weight: 600;
+    background: var(--color-bg); /* Mask line */
+  }
+
+  input:focus,
+  textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.1);
+  }
+
+  .success-banner {
+    margin-top: 1rem;
+    padding: 0.8rem;
+    background: rgba(var(--color-primary-rgb), 0.1);
+    color: var(--color-primary);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    animation: fade-in 0.3s;
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .entries-masonry {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .entry-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    padding: 1.5rem;
+    border-radius: 12px;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .entry-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-sm);
+    border-color: var(--color-primary);
+  }
+
+  .entry-msg {
+    font-size: 1.1rem;
+    font-style: italic;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+  }
+
+  .entry-footer {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    font-family: "Fira Code", monospace;
+    opacity: 0.6;
+    border-top: 1px solid var(--color-border);
+    padding-top: 0.8rem;
+  }
+  .entry-name {
+    font-weight: 700;
+    color: var(--color-text);
+  }
+</style>
