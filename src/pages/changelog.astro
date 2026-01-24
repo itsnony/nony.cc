@@ -1,0 +1,172 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { getCollection } from "astro:content";
+
+const logs = (await getCollection("changelog")).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+
+const renderedLogs = await Promise.all(
+  logs.map(async (log) => {
+    const { Content } = await log.render();
+    return { ...log, Content };
+  }),
+);
+
+// Group by Date for cleaner UI? Or just simple list.
+// Let's do a vertical timeline.
+---
+
+<Layout title="Changelog | Nony">
+  <div class="blob-cont">
+    <div class="blob-shape blob-1"></div>
+    <div class="blob-shape blob-2"></div>
+  </div>
+
+  <main class="wrapper">
+    <header class="page-header">
+      <h1>Changelog<span class="dot">.</span></h1>
+      <p>Tracking the descent into madness.</p>
+    </header>
+
+    <div class="timeline">
+      {
+        renderedLogs.map((log) => (
+          <div class="timeline-item">
+            <div class="timeline-date">
+              <span class="date">
+                {log.data.date.toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              </span>
+              {log.data.version && (
+                <span class="version-badge">{log.data.version}</span>
+              )}
+            </div>
+            <div class="timeline-content glass-panel">
+              <div class="content-header">
+                <h3>{log.data.title}</h3>
+                <span class="project-tag">{log.data.project}</span>
+              </div>
+              <div class="prose">
+                <log.Content />
+              </div>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .page-header {
+    margin: 6rem 0 4rem 0;
+    text-align: center;
+  }
+  .page-header h1 {
+    font-size: 4rem;
+    margin-bottom: 0.5rem;
+  }
+  .dot {
+    color: var(--color-primary);
+  }
+
+  .timeline {
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto;
+    padding-left: 20px;
+    padding-bottom: 4rem;
+  }
+
+  /* Vertical Line */
+  .timeline::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 2px;
+    background: rgba(var(--color-primary-rgb), 0.3);
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 4rem;
+  }
+
+  /* Dot on line */
+  .timeline-item::before {
+    content: "";
+    position: absolute;
+    left: -25px;
+    top: 25px; /* Adjust based on content alignment */
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--color-bg);
+    border: 2px solid var(--color-primary);
+    z-index: 2;
+  }
+
+  .timeline-date {
+    margin-bottom: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-family: "Fira Code", monospace;
+    font-size: 0.9rem;
+    color: var(--color-text-light);
+  }
+
+  .version-badge {
+    background: rgba(var(--color-primary-rgb), 0.1);
+    color: var(--color-primary);
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+  }
+
+  .timeline-content {
+    padding: 2rem;
+  }
+
+  .content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 1rem;
+  }
+
+  .content-header h3 {
+    margin: 0;
+    font-size: 1.4rem;
+  }
+
+  .project-tag {
+    font-family: "Fira Code", monospace;
+    font-size: 0.8rem;
+    background: var(--color-text);
+    color: var(--color-bg);
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .timeline {
+      padding-left: 0;
+    }
+    .timeline::before {
+      display: none;
+    }
+    .timeline-item::before {
+      display: none;
+    }
+  }
+</style>

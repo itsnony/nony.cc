@@ -9,7 +9,7 @@ Here is a simple truth: **If you buy a premium domain and leave it blank, you ar
 
 I will admit, I have 25 domains in my Spaceship account. But at least I have the decency to put up a "Coming Soon" page or redirect it to a rickroll. My domains are bad financial decisions, but they are _loved_.
 
-But today, I tried to find a home for **Sidequest**. And I found out that the internet is full of squatters.
+But today, I tried to find a home for **[Sidequest](https://nony.cc/blog/i-accidentaly-invented-an-app)**. And I found out that the internet is full of squatters.
 
 ## The Exhibit of Crimes
 

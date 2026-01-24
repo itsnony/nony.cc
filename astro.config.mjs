@@ -5,5 +5,11 @@ import vercel from '@astrojs/vercel';
 
 // https://astro.build/config
 export default defineConfig({
-    adapter: vercel()
+    adapter: vercel(),
+    markdown: {
+        shikiConfig: {
+            theme: 'dracula',
+            wrap: true
+        }
+    }
 });

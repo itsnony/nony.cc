@@ -200,13 +200,138 @@ img {
 
 /* Reduce backdrop filter load on low power if possible, but hard to detect in pure CSS easily without queries.
    We'll just keep it but ensure layers are promoted. */
+/* Reduce backdrop filter load on low power if possible */
 .glass-panel {
     background: var(--color-surface);
     backdrop-filter: blur(12px);
-    /* Reduced from 16px */
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
     transform: translate3d(0, 0, 0);
+}
+
+/* =========================================
+   MARKDOWN TYPOGRAPHY & CODE BLOCKS
+   ========================================= */
+
+/* PROSE CONTAINER */
+.prose {
+    max-width: 65ch; /* Optimal reading line length */
+    margin: 0 auto;
+    font-size: 1.1rem;
+    line-height: 1.8;
+}
+
+.prose p {
+    margin-bottom: 2rem;
+    opacity: 0.9;
+}
+
+/* HEADERS */
+.prose h2 {
+    font-size: 2rem;
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+    position: relative;
+    display: inline-block;
+}
+
+.prose h3 {
+    font-size: 1.5rem;
+    margin-top: 2.5rem;
+    margin-bottom: 0.8rem;
+    color: var(--color-primary);
+}
+
+/* LISTS */
+.prose ul, .prose ol {
+    margin-bottom: 2rem;
+    padding-left: 2rem;
+}
+.prose li {
+    margin-bottom: 0.8rem;
+    position: relative;
+}
+.prose ul li::marker {
+    color: var(--color-primary);
+}
+
+/* BLOCKQUOTES - Modern Sidebar Style */
+.prose blockquote {
+    border-left: 4px solid var(--color-primary);
+    margin: 2rem 0;
+    padding: 1rem 1.5rem;
+    background: rgba(var(--color-primary-rgb), 0.05);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    font-style: italic;
+    color: var(--color-text);
+}
+
+/* INLINE CODE - Pill Style */
+:not(pre) > code {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.85em;
+    background: rgba(var(--color-primary-rgb), 0.15);
+    color: var(--color-primary);
+    padding: 0.2em 0.5em;
+    border-radius: 6px;
+    border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+}
+
+/* CODE BLOCKS - THE MAC WINDOW */
+pre {
+    position: relative;
+    padding: 3rem 1.5rem 1.5rem 1.5rem; /* Top padding for window bar */
+    border-radius: 12px;
+    background: #1E1E1E !important; /* Force dark background for dracula */
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    margin: 2.5rem 0;
+    overflow-x: auto;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9em;
+    line-height: 1.6;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* The Mac Window Bar */
+pre::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: rgba(255,255,255,0.05);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    border-radius: 12px 12px 0 0;
+    pointer-events: none;
+}
+
+/* The Traffic Light Dots */
+pre::after {
+    content: "";
+    position: absolute;
+    top: 13px; /* Center in the bar */
+    left: 15px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #FF5F56; /* Red */
+    box-shadow: 
+        20px 0 0 #FFBD2E, /* Yellow */
+        40px 0 0 #27C93F; /* Green */
+}
+
+/* LINK WITHIN PROSE */
+.prose a {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-thickness: 2px;
+    transition: all 0.2s;
+}
+.prose a:hover {
+    background: rgba(var(--color-primary-rgb), 0.1);
+    border-radius: 4px;
 }

@@ -63,4 +63,15 @@ const projects = defineCollection({
     })
 });
 
-export const collections = { blog, writing, music, rants, projects };
+const changelog = defineCollection({
+    type: "content",
+    schema: z.object({
+        title: z.string(),
+        date: z.coerce.date(),
+        project: z.string().default("nony.cc"),
+        version: z.string().optional(),
+        description: z.string()
+    })
+});
+
+export const collections = { blog, writing, music, rants, projects, changelog };

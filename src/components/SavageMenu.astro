@@ -5,144 +5,143 @@ import config from "../config.json";
 const messages = config.savageMessages;
 ---
 
-<div id="savage-menu" class="hidden" data-messages={JSON.stringify(messages)}>
-    <div class="menu-content">
-        <div class="icon"><i class="fi fi-rr-cross-circle"></i></div>
-        <p id="savage-msg">Nice try.</p>
-    </div>
+<div
+  id="flashbang-overlay"
+  class="hidden"
+  data-messages={JSON.stringify(messages)}
+>
+  <div class="flash-content">
+    <h1 id="flash-msg">NICE TRY</h1>
+  </div>
 </div>
 
 <script>
-    // Inline protection logic - no external import needed
+  function initSavageFlashbang() {
+    // Disable on localhost? Maybe keep it for fun.
+    // if (window.location.hostname === "localhost") return;
 
-    function initSavageMenu() {
-        // Disable on localhost for debugging
-        if (
-            window.location.hostname === "localhost" ||
-            window.location.hostname === "127.0.0.1"
-        ) {
-            return;
+    const overlay = document.getElementById("flashbang-overlay");
+    const msgEl = document.getElementById("flash-msg");
+    const messagesData = overlay?.dataset.messages;
+
+    if (!overlay || !msgEl || !messagesData) return;
+
+    const messages = JSON.parse(messagesData);
+    let isFlashbanged = false;
+
+    const triggerFlashbang = (e: Event) => {
+      // If strictly needed to block default:
+      if (e.type === "contextmenu") e.preventDefault();
+
+      if (isFlashbanged) return;
+      isFlashbanged = true;
+
+      // Pick random message
+      const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+      msgEl.innerText = randomMsg;
+
+      // Show Overlay
+      overlay.classList.remove("hidden");
+      overlay.classList.add("active");
+
+      // Audio Effect? (Optional, maybe later)
+
+      // Duration: 3 seconds total
+      // 1. Instant Whiteout (already handled by class add)
+      // 2. Wait 3s
+      setTimeout(() => {
+        // Fade out
+        overlay.classList.remove("active");
+        overlay.classList.add("fading");
+
+        setTimeout(() => {
+          overlay.classList.add("hidden");
+          overlay.classList.remove("fading");
+          isFlashbanged = false;
+        }, 1000); // Fade duration
+      }, 2000); // Visible duration
+    };
+
+    // Right Click
+    document.addEventListener("contextmenu", triggerFlashbang);
+
+    // AGGRESSIVE DEVTOOLS BLOCKING
+    // Use Capture Phase (true) to intercept before anyone else
+    window.addEventListener(
+      "keydown",
+      (e) => {
+        // Normalize
+        const k = e.key.toUpperCase();
+        const ctrl = e.ctrlKey || e.metaKey;
+        const shift = e.shiftKey;
+
+        // Block List
+        const isBlocked =
+          e.key === "F12" ||
+          (ctrl && shift && ["I", "J", "C", "K", "U"].includes(k)) || // DevTools & Source
+          (ctrl && k === "U") || // View Source
+          (ctrl && k === "S"); // Save Page
+
+        if (isBlocked) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          triggerFlashbang(e);
+          return false;
         }
+      },
+      true, // CAPTURE PHASE
+    );
 
-        const menu = document.getElementById("savage-menu");
-        const msgEl = document.getElementById("savage-msg");
-        const messagesData = menu?.dataset.messages;
+    // The Trap (Debugger Loop)
+    setInterval(() => {
+      const start = performance.now();
+      debugger;
+    }, 500);
+  }
 
-        if (!menu || !msgEl || !messagesData) return;
-
-        const messages = JSON.parse(messagesData);
-
-        const showMenu = (
-            e: MouseEvent | KeyboardEvent,
-            customMsg: string | null = null,
-        ) => {
-            e.preventDefault();
-            msgEl.innerText =
-                customMsg ||
-                messages[Math.floor(Math.random() * messages.length)];
-
-            // Position with boundary check
-            let x = 0;
-            let y = 0;
-
-            if (e instanceof MouseEvent) {
-                x = e.clientX;
-                y = e.clientY;
-            } else {
-                // Center for keyboard events
-                x = window.innerWidth / 2;
-                y = window.innerHeight / 2;
-            }
-
-            // Simple boundary check
-            if (x + 200 > window.innerWidth) x = window.innerWidth - 220;
-            if (y + 100 > window.innerHeight) y = window.innerHeight - 120;
-
-            menu.style.left = `${x}px`;
-            menu.style.top = `${y}px`;
-
-            menu.classList.remove("hidden");
-            menu.classList.add("visible");
-        };
-
-        const hideMenu = () => {
-            menu.classList.remove("visible");
-            menu.classList.add("hidden");
-        };
-
-        // Right Click
-        document.addEventListener("contextmenu", (e) => showMenu(e));
-
-        // Click / Scroll to hide
-        document.addEventListener("click", hideMenu);
-        document.addEventListener("scroll", hideMenu);
-
-        // DevTools Protection
-        document.addEventListener("keydown", (e) => {
-            // F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
-            if (
-                e.key === "F12" ||
-                ((e.ctrlKey || e.metaKey) &&
-                    e.shiftKey &&
-                    (e.key === "I" || e.key === "J" || e.key === "C")) ||
-                ((e.ctrlKey || e.metaKey) && e.key === "U")
-            ) {
-                showMenu(e, "Nice try, hacker.");
-            }
-        });
-    }
-
-    // Run on initial load
-    initSavageMenu();
-
-    // Run on subsequent navigations (View Transitions)
-    document.addEventListener("astro:page-load", initSavageMenu);
+  initSavageFlashbang();
+  document.addEventListener("astro:page-load", initSavageFlashbang);
 </script>
 
 <style>
-    #savage-menu {
-        position: fixed;
-        z-index: 99999;
-        pointer-events: none;
-        transform: scale(0.9);
-        opacity: 0;
-        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    }
+  #flashbang-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none; /* Let clicks pass through when hidden */
+    opacity: 0;
+    transition: opacity 0.1s ease-out; /* Fast in */
+  }
 
-    #savage-menu.visible {
-        transform: scale(1);
-        opacity: 1;
-    }
+  #flashbang-overlay.active {
+    opacity: 1;
+    pointer-events: all; /* Block interactions */
+  }
 
-    .menu-content {
-        background: rgba(0, 0, 0, 0.8);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 0.8rem 1.2rem;
-        border-radius: 12px;
-        color: white;
-        display: flex;
-        align-items: center;
-        gap: 0.8rem;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        min-width: 150px;
-    }
+  #flashbang-overlay.fading {
+    opacity: 0;
+    transition: opacity 1s ease-in; /* Slow fade out */
+    pointer-events: all;
+  }
 
-    :global(html:not(.dark)) .menu-content {
-        background: rgba(255, 255, 255, 0.8);
-        color: black;
-        border-color: rgba(0, 0, 0, 0.1);
-    }
+  #flashbang-overlay.hidden {
+    display: none;
+  }
 
-    .icon {
-        font-size: 1.2rem;
-    }
-    p {
-        margin: 0;
-        font-family: "Fira Code", monospace;
-        font-size: 0.9rem;
-        font-weight: 500;
-        white-space: nowrap;
-    }
+  .flash-content h1 {
+    font-family: "Fraunces", serif; /* Or maybe a blocky font? */
+    font-weight: 900;
+    font-size: 5vw; /* Huge */
+    color: black;
+    text-transform: uppercase;
+    text-align: center;
+    margin: 0;
+    padding: 0 1rem;
+    line-height: 1.1;
+  }
 </style>

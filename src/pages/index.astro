@@ -5,639 +5,647 @@ import { getCollection } from "astro:content";
 
 const { profile } = config;
 const selectedProjects = (await getCollection("projects"))
-    .filter((p) => p.data.featured)
-    .sort((a, b) => a.data.order - b.data.order)
-    .slice(0, 3);
+  .filter((p) => p.data.featured)
+  .sort((a, b) => a.data.order - b.data.order)
+  .slice(0, 3);
+
+const recentRants = (await getCollection("rants"))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 2);
 ---
 
 <Layout title={`${profile.name} | ${profile.tagline}`}>
-    <div class="blob-cont">
-        <div class="blob-shape blob-1"></div>
-        <div class="blob-shape blob-2"></div>
-        <div class="blob-shape blob-3"></div>
+  <div class="blob-cont">
+    <div class="blob-shape blob-1"></div>
+    <div class="blob-shape blob-2"></div>
+    <div class="blob-shape blob-3"></div>
+  </div>
+
+  <!-- SVG FILTERS -->
+  <svg class="svg-filters">
+    <defs>
+      <filter id="pixelate" x="0" y="0">
+        <feFlood x="2" y="2" height="1" width="1"></feFlood>
+        <feComposite width="10" height="10"></feComposite>
+        <feTile result="a"></feTile>
+        <feComposite in="SourceGraphic" in2="a" operator="in"></feComposite>
+        <feMorphology operator="dilate" radius="5"></feMorphology>
+      </filter>
+    </defs>
+  </svg>
+
+  <main class="hero-split">
+    <div class="content-side">
+      <h1 class="hero-name">{profile.name}<span class="dot">.</span></h1>
+
+      <p class="hero-bio" set:html={profile.bio} />
+
+      <div class="rant-mini">
+        <p>
+          {profile.minibio}
+        </p>
+        <div class="status-line">
+          <span class="status-dot"></span> Status: {profile.status}
+        </div>
+      </div>
+
+      <div class="cta-row">
+        <a href="/projects" class="btn-lab">
+          <i class="fi fi-rr-box-alt"></i> Prototypes
+        </a>
+        <a href="/rants" class="btn btn-ghost">
+          <i class="fi fi-rr-megaphone"></i> Read Rants
+        </a>
+      </div>
     </div>
 
-    <!-- SVG FILTERS -->
-    <svg class="svg-filters">
-        <defs>
-            <filter id="pixelate" x="0" y="0">
-                <feFlood x="2" y="2" height="1" width="1"></feFlood>
-                <feComposite width="10" height="10"></feComposite>
-                <feTile result="a"></feTile>
-                <feComposite in="SourceGraphic" in2="a" operator="in"
-                ></feComposite>
-                <feMorphology operator="dilate" radius="5"></feMorphology>
-            </filter>
-        </defs>
-    </svg>
+    <div class="image-side">
+      <div class="img-container">
+        <img
+          id="profile-pic"
+          src={profile.image}
+          alt={profile.name}
+          class="profile-img pixelated"
+        />
+        <div class="tech-ring"></div>
+      </div>
+      <p class="secret-hint">Psst. Try ?nextjs=sucks</p>
+    </div>
 
-    <main class="hero-split">
-        <div class="content-side">
-            <h1 class="hero-name">{profile.name}<span class="dot">.</span></h1>
+    <!-- EASTER EGG LOGIC -->
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const img = document.getElementById("profile-pic");
+      const hint = document.querySelector(".secret-hint");
 
-            <p class="hero-bio" set:html={profile.bio} />
+      if (params.get("nextjs") === "sucks") {
+        img?.classList.remove("pixelated");
+        if (hint) hint.innerHTML = "Access Granted.";
+      }
+    </script>
 
-            <div class="rant-mini">
-                <p>
-                    {profile.minibio}
-                </p>
-                <div class="status-line">
-                    <span class="status-dot"></span> Status: {profile.status}
-                </div>
+    <!-- NEW SECTIONS -->
+    <!-- NEW SECTIONS -->
+    <section class="home-section">
+      <div class="section-header">
+        <h2>Latest Rants</h2>
+        <a href="/rants" class="view-all"
+          >View All <i class="fi fi-rr-arrow-right"></i></a
+        >
+      </div>
+      <div class="grid-2">
+        {
+          recentRants.length > 0 ? (
+            recentRants.map((rant) => (
+              <a href={`/rants/${rant.slug}`} class="mini-card rage">
+                <span class="tag">{rant.data.angerLevel}% RAGE</span>
+                <h3>{rant.data.title}</h3>
+                <p>{rant.body.slice(0, 100)}...</p>
+              </a>
+            ))
+          ) : (
+            <div class="mini-card placeholder">
+              <span class="tag">COMING SOON</span>
+              <h3>More Opinions Loading...</h3>
+              <p>I'm finding new things to be angry about.</p>
             </div>
+          )
+        }
+      </div>
+    </section>
 
-            <div class="cta-row">
-                <a href="/projects" class="btn-lab">
-                    <i class="fi fi-rr-box-alt"></i> Prototypes
-                </a>
-                <a href="/rants" class="btn btn-ghost">
-                    <i class="fi fi-rr-megaphone"></i> Read Rants
-                </a>
+    <section class="home-section">
+      <div class="section-header">
+        <h2>Selected Projects</h2>
+        <a href="/projects" class="view-all"
+          >View Lab <i class="fi fi-rr-arrow-right"></i></a
+        >
+      </div>
+      <div class="grid-3">
+        {
+          selectedProjects.map((project) => (
+            <div class="project-glass">
+              <div class="icon">
+                <i class={project.data.icon} />
+              </div>
+              <h3>{project.data.title}</h3>
+              <p>{project.data.description}</p>
             </div>
-        </div>
+          ))
+        }
+      </div>
+    </section>
+  </main>
 
-        <div class="image-side">
-            <div class="img-container">
-                <img
-                    id="profile-pic"
-                    src={profile.image}
-                    alt={profile.name}
-                    class="profile-img pixelated"
-                />
-                <div class="tech-ring"></div>
-            </div>
-            <p class="secret-hint">Psst. Try ?nextjs=sucks</p>
-        </div>
+  <style>
+    main {
+      min-height: 100vh;
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      align-items: center;
+      gap: 6rem; /* Increased gap for better breathability */
+      position: relative;
+      z-index: 1;
+    }
 
-        <!-- EASTER EGG LOGIC -->
-        <script>
-            const params = new URLSearchParams(window.location.search);
-            const img = document.getElementById("profile-pic");
-            const hint = document.querySelector(".secret-hint");
+    /* FLUID BLOBS */
+    .blob-cont {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+    }
+    .blob-1 {
+      top: -10%;
+      left: -10%;
+      width: 700px;
+      height: 700px;
+      background: var(--color-blob-1);
+      opacity: 0.5;
+      animation: float 20s infinite alternate;
+    }
+    .blob-2 {
+      bottom: -10%;
+      right: -5%;
+      width: 600px;
+      height: 600px;
+      background: var(--color-blob-2);
+      opacity: 0.5;
+      animation-delay: -5s;
+      animation: float 25s infinite alternate-reverse;
+    }
+    .blob-3 {
+      top: 40%;
+      left: 40%;
+      width: 400px;
+      height: 400px;
+      background: var(--color-blob-3);
+      opacity: 0.3;
+      animation: float 15s infinite linear;
+    }
+    @keyframes float {
+      0% {
+        transform: translate(0, 0);
+      }
+      100% {
+        transform: translate(30px, 30px);
+      }
+    }
 
-            if (params.get("nextjs") === "sucks") {
-                img?.classList.remove("pixelated");
-                if (hint) hint.innerHTML = "Access Granted.";
-            }
-        </script>
+    /* CONTENT SIDE & ANIMATIONS */
+    .content-side {
+      display: flex;
+      flex-direction: column;
+      animation: enter-up 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
 
-        <!-- NEW SECTIONS -->
-        <section class="home-section">
-            <div class="section-header">
-                <h2>Latest Rants</h2>
-                <a href="/rants" class="view-all"
-                    >View All <i class="fi fi-rr-arrow-right"></i></a
-                >
-            </div>
-            <div class="grid-2">
-                <!-- Dynamic import in real app, hardcoded demo for now or we use collection -->
-                <a href="/rants/why-i-hate-nextjs" class="mini-card rage">
-                    <span class="tag">95% RAGE</span>
-                    <h3>Why I Hate Next.js</h3>
-                    <p>
-                        Simplicity is dead and Vercel killed it. Return to HTML.
-                    </p>
-                </a>
-                <div class="mini-card placeholder">
-                    <span class="tag">COMING SOON</span>
-                    <h3>More Opinions Loading...</h3>
-                    <p>I'm finding new things to be angry about.</p>
-                </div>
-            </div>
-        </section>
+    @keyframes enter-up {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
 
-        <section class="home-section">
-            <div class="section-header">
-                <h2>Selected Projects</h2>
-                <a href="/projects" class="view-all"
-                    >View Lab <i class="fi fi-rr-arrow-right"></i></a
-                >
-            </div>
-            <div class="grid-3">
-                {
-                    selectedProjects.map((project) => (
-                        <div class="project-glass">
-                            <div class="icon">
-                                <i class={project.data.icon} />
-                            </div>
-                            <h3>{project.data.title}</h3>
-                            <p>{project.data.description}</p>
-                        </div>
-                    ))
-                }
-            </div>
-        </section>
-    </main>
+    .badge-row {
+      display: flex;
+      gap: 0.8rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+    .glass-badge {
+      font-family: "Fira Code", monospace;
+      font-size: 0.8rem;
+      padding: 0.4rem 1rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 4px; /* Sharper */
+      color: var(--color-text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .glass-badge.warning {
+      background: rgba(255, 150, 0, 0.1);
+      color: #d97706;
+      border-color: rgba(255, 150, 0, 0.2);
+    }
+    :global(.dark) .glass-badge.warning {
+      color: #fbbf24;
+    }
 
-    <style>
-        main {
-            min-height: 100vh;
-            max-width: 1300px;
-            margin: 0 auto;
-            padding: 0 2rem;
-            display: grid;
-            grid-template-columns: 1.2fr 1fr;
-            align-items: center;
-            gap: 6rem; /* Increased gap for better breathability */
-            position: relative;
-            z-index: 1;
-        }
+    .hero-name {
+      font-family: "Fraunces", serif;
+      font-size: 6.5rem;
+      line-height: 0.9;
+      margin: 0 0 1.5rem 0;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      color: var(--color-text);
+      text-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+    }
+    .dot {
+      color: var(--color-primary);
+    }
 
-        /* FLUID BLOBS */
-        .blob-cont {
-            position: fixed;
-            inset: 0;
-            z-index: -1;
-            pointer-events: none;
-        }
-        .blob-1 {
-            top: -10%;
-            left: -10%;
-            width: 700px;
-            height: 700px;
-            background: var(--color-blob-1);
-            opacity: 0.5;
-            animation: float 20s infinite alternate;
-        }
-        .blob-2 {
-            bottom: -10%;
-            right: -5%;
-            width: 600px;
-            height: 600px;
-            background: var(--color-blob-2);
-            opacity: 0.5;
-            animation-delay: -5s;
-            animation: float 25s infinite alternate-reverse;
-        }
-        .blob-3 {
-            top: 40%;
-            left: 40%;
-            width: 400px;
-            height: 400px;
-            background: var(--color-blob-3);
-            opacity: 0.3;
-            animation: float 15s infinite linear;
-        }
-        @keyframes float {
-            0% {
-                transform: translate(0, 0);
-            }
-            100% {
-                transform: translate(30px, 30px);
-            }
-        }
+    .hero-bio {
+      font-size: 1.4rem;
+      color: var(--color-text);
+      margin-bottom: 3rem;
+      max-width: 90%;
+      line-height: 1.4;
+      font-weight: 300;
+    }
+    .highlight {
+      font-family: "Fira Code", monospace;
+      color: var(--color-primary);
+      font-weight: 600;
+      background: rgba(0, 0, 0, 0.05);
+      padding: 0.1rem 0.5rem;
+      border-radius: 4px;
+    }
+    :global(.dark) .highlight {
+      background: rgba(255, 255, 255, 0.1);
+    }
 
-        /* CONTENT SIDE & ANIMATIONS */
-        .content-side {
-            display: flex;
-            flex-direction: column;
-            animation: enter-up 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-        }
+    .rant-mini {
+      background: rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(10px);
+      border-left: 3px solid var(--color-secondary);
+      padding: 1.5rem 2rem;
+      border-radius: 0 4px 4px 0;
+      margin-bottom: 3.5rem;
+      color: var(--color-text-light);
+      font-size: 1.1rem;
+      line-height: 1.6;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
+    }
+    :global(.dark) .rant-mini {
+      background: rgba(20, 20, 20, 0.4);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
 
-        @keyframes enter-up {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+    /* STATUS */
+    .custom-status {
+      background: rgba(0, 0, 0, 0.05);
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      display: inline-flex;
+      width: auto;
+    }
+    :global(.dark) .custom-status {
+      background: rgba(255, 255, 255, 0.05);
+    }
 
-        .badge-row {
-            display: flex;
-            gap: 0.8rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-        }
-        .glass-badge {
-            font-family: "Fira Code", monospace;
-            font-size: 0.8rem;
-            padding: 0.4rem 1rem;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 4px; /* Sharper */
-            color: var(--color-text-light);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        .glass-badge.warning {
-            background: rgba(255, 150, 0, 0.1);
-            color: #d97706;
-            border-color: rgba(255, 150, 0, 0.2);
-        }
-        :global(.dark) .glass-badge.warning {
-            color: #fbbf24;
-        }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: #10b981;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #10b981;
+      animation: pulse-green 2s infinite;
+    }
+    @keyframes pulse-green {
+      0% {
+        opacity: 1;
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+      }
+      70% {
+        opacity: 1;
+        box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+      }
+      100% {
+        opacity: 1;
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+      }
+    }
 
-        .hero-name {
-            font-family: "Fraunces", serif;
-            font-size: 6.5rem;
-            line-height: 0.9;
-            margin: 0 0 1.5rem 0;
-            font-weight: 800;
-            letter-spacing: -0.04em;
-            color: var(--color-text);
-            text-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
-        }
-        .dot {
-            color: var(--color-primary);
-        }
+    .status-text {
+      font-weight: 600;
+      background: linear-gradient(90deg, #10b981, #34d399);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
 
-        .hero-bio {
-            font-size: 1.4rem;
-            color: var(--color-text);
-            margin-bottom: 3rem;
-            max-width: 90%;
-            line-height: 1.4;
-            font-weight: 300;
-        }
-        .highlight {
-            font-family: "Fira Code", monospace;
-            color: var(--color-primary);
-            font-weight: 600;
-            background: rgba(0, 0, 0, 0.05);
-            padding: 0.1rem 0.5rem;
-            border-radius: 4px;
-        }
-        :global(.dark) .highlight {
-            background: rgba(255, 255, 255, 0.1);
-        }
+    .cta-row {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
 
-        .rant-mini {
-            background: rgba(255, 255, 255, 0.4);
-            backdrop-filter: blur(10px);
-            border-left: 3px solid var(--color-secondary);
-            padding: 1.5rem 2rem;
-            border-radius: 0 4px 4px 0;
-            margin-bottom: 3.5rem;
-            color: var(--color-text-light);
-            font-size: 1.1rem;
-            line-height: 1.6;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
-        }
-        :global(.dark) .rant-mini {
-            background: rgba(20, 20, 20, 0.4);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        }
+    /* ROUND BUTTONS RESTORED */
+    .btn-primary,
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.8rem 1.6rem;
+      background: var(--color-text);
+      color: var(--color-bg);
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.2s;
+      line-height: 1; /* Fix vertical alignment */
+    }
 
-        /* STATUS */
-        .custom-status {
-            background: rgba(0, 0, 0, 0.05);
-            padding: 0.5rem 1rem;
-            border-radius: 50px;
-            display: inline-flex;
-            width: auto;
-        }
-        :global(.dark) .custom-status {
-            background: rgba(255, 255, 255, 0.05);
-        }
+    .btn i {
+      font-size: 1.1em;
+      line-height: 0;
+      display: inline-flex;
+      align-items: center;
+    }
 
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background: #10b981;
-            border-radius: 50%;
-            box-shadow: 0 0 10px #10b981;
-            animation: pulse-green 2s infinite;
-        }
-        @keyframes pulse-green {
-            0% {
-                opacity: 1;
-                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-            }
-            70% {
-                opacity: 1;
-                box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
-            }
-            100% {
-                opacity: 1;
-                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
-            }
-        }
+    .btn-primary {
+      background: var(--color-primary);
+      color: white;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    }
+    .btn-primary:hover {
+      background: var(--color-secondary);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+      transform: translateY(-3px);
+    }
 
-        .status-text {
-            font-weight: 600;
-            background: linear-gradient(90deg, #10b981, #34d399);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+    /* THE LAB BUTTON */
+    .btn-lab {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.8rem 1.6rem;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      line-height: 1;
 
-        .cta-row {
-            display: flex;
-            gap: 1.5rem;
-            align-items: center;
-        }
+      /* Lab Aesthetic */
+      background: rgba(var(--color-primary-rgb), 0.1);
+      border: 1px solid var(--color-primary);
+      color: var(--color-primary);
+      box-shadow: 0 0 15px rgba(var(--color-primary-rgb), 0.2);
+      backdrop-filter: blur(5px);
+    }
+    .btn-lab:hover {
+      background: var(--color-primary);
+      color: white;
+      box-shadow: 0 0 30px rgba(var(--color-primary-rgb), 0.6);
+      transform: translateY(-3px) scale(1.02);
+    }
+    :global(.dark) .btn-lab {
+      /* Brighter in dark mode */
+      box-shadow: 0 0 20px rgba(var(--color-primary-rgb), 0.3);
+    }
+    .btn-lab i {
+      display: inline-flex;
+      align-items: center;
+      line-height: 0;
+      font-size: 1.1em;
+    }
 
-        /* ROUND BUTTONS RESTORED */
-        .btn-primary,
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.8rem 1.6rem;
-            background: var(--color-text);
-            color: var(--color-bg);
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.2s;
-            line-height: 1; /* Fix vertical alignment */
-        }
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--color-text);
+      border: 1px solid var(--color-text);
+    }
+    .btn-ghost:hover {
+      background: var(--color-text);
+      color: var(--color-bg);
+      transform: translateY(-3px);
+    }
 
-        .btn i {
-            font-size: 1.1em;
-            line-height: 0;
-            display: inline-flex;
-            align-items: center;
-        }
+    /* IMAGE SIDE */
+    .image-side {
+      display: flex;
+      justify-content: center;
+      animation: enter-scale 1s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes enter-scale {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
 
-        .btn-primary {
-            background: var(--color-primary);
-            color: white;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
-        }
-        .btn-primary:hover {
-            background: var(--color-secondary);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-            transform: translateY(-3px);
-        }
+    .img-container {
+      position: relative;
+      width: 500px;
+      height: 500px;
+    }
 
-        /* THE LAB BUTTON */
-        .btn-lab {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.8rem 1.6rem;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            line-height: 1;
-
-            /* Lab Aesthetic */
-            background: rgba(var(--color-primary-rgb), 0.1);
-            border: 1px solid var(--color-primary);
-            color: var(--color-primary);
-            box-shadow: 0 0 15px rgba(var(--color-primary-rgb), 0.2);
-            backdrop-filter: blur(5px);
-        }
-        .btn-lab:hover {
-            background: var(--color-primary);
-            color: white;
-            box-shadow: 0 0 30px rgba(var(--color-primary-rgb), 0.6);
-            transform: translateY(-3px) scale(1.02);
-        }
-        :global(.dark) .btn-lab {
-            /* Brighter in dark mode */
-            box-shadow: 0 0 20px rgba(var(--color-primary-rgb), 0.3);
-        }
-        .btn-lab i {
-            display: inline-flex;
-            align-items: center;
-            line-height: 0;
-            font-size: 1.1em;
-        }
-
-        .btn-ghost {
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--color-text);
-            border: 1px solid var(--color-text);
-        }
-        .btn-ghost:hover {
-            background: var(--color-text);
-            color: var(--color-bg);
-            transform: translateY(-3px);
-        }
-
-        /* IMAGE SIDE */
-        .image-side {
-            display: flex;
-            justify-content: center;
-            animation: enter-scale 1s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        @keyframes enter-scale {
-            from {
-                opacity: 0;
-                transform: scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        .img-container {
-            position: relative;
-            width: 500px;
-            height: 500px;
-        }
-
-        .profile-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 50%; /* Force circle for logo/profile */
-            animation: none; /* Removed blob morph for cleaner look if logo */
-            box-shadow: 20px 20px 60px rgba(0, 0, 0, 0.1);
-            z-index: 2;
-            position: relative;
-            transition: all 0.5s ease;
-        }
-        /* If we want to restore morph only for the secret image, we'd need JS to add a class. 
+    .profile-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%; /* Force circle for logo/profile */
+      animation: none; /* Removed blob morph for cleaner look if logo */
+      box-shadow: 20px 20px 60px rgba(0, 0, 0, 0.1);
+      z-index: 2;
+      position: relative;
+      transition: all 0.5s ease;
+    }
+    /* If we want to restore morph only for the secret image, we'd need JS to add a class. 
        For now, let's keep it clean circle. */
 
-        .secret-hint {
-            position: absolute;
-            bottom: -30px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-family: "Fira Code", monospace;
-            font-size: 0.7rem;
-            opacity: 0.5;
-            white-space: nowrap;
-        }
+    .secret-hint {
+      position: absolute;
+      bottom: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: "Fira Code", monospace;
+      font-size: 0.7rem;
+      opacity: 0.5;
+      white-space: nowrap;
+    }
 
-        .tech-ring {
-            position: absolute;
-            inset: -30px;
-            border: 1px dashed var(--color-primary);
-            border-radius: 50%;
-            opacity: 0.2;
-            animation: spin 30s linear infinite;
-            z-index: 1;
-            pointer-events: none;
-        }
+    .tech-ring {
+      position: absolute;
+      inset: -30px;
+      border: 1px dashed var(--color-primary);
+      border-radius: 50%;
+      opacity: 0.2;
+      animation: spin 30s linear infinite;
+      z-index: 1;
+      pointer-events: none;
+    }
 
-        @keyframes morph {
-            0% {
-                border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
-            }
-            100% {
-                border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%;
-            }
-        }
-        @keyframes spin {
-            from {
-                transform: rotate(0deg);
-            }
-            to {
-                transform: rotate(360deg);
-            }
-        }
+    @keyframes morph {
+      0% {
+        border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+      }
+      100% {
+        border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%;
+      }
+    }
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
 
-        @media (max-width: 968px) {
-            main {
-                grid-template-columns: 1fr;
-                padding-top: 8rem;
-                text-align: center;
-                gap: 3rem;
-            }
-            .content-side {
-                order: 2;
-            }
-            .image-side {
-                order: 1;
-                margin-bottom: 2rem;
-            }
-            .badge-row,
-            .status-line,
-            .cta-row {
-                justify-content: center;
-            }
-            .hero-name {
-                font-size: 4rem;
-            }
-            .img-container {
-                width: 300px;
-                height: 300px;
-                margin: 0 auto;
-            }
-            .btn-primary,
-            .btn-ghost {
-                width: 100%;
-                justify-content: center;
-            }
-            .grid-2 {
-                grid-template-columns: 1fr;
-            }
-        }
+    @media (max-width: 968px) {
+      main {
+        grid-template-columns: 1fr;
+        padding-top: 8rem;
+        text-align: center;
+        gap: 3rem;
+      }
+      .content-side {
+        order: 2;
+      }
+      .image-side {
+        order: 1;
+        margin-bottom: 2rem;
+      }
+      .badge-row,
+      .status-line,
+      .cta-row {
+        justify-content: center;
+      }
+      .hero-name {
+        font-size: 4rem;
+      }
+      .img-container {
+        width: 300px;
+        height: 300px;
+        margin: 0 auto;
+      }
+      .btn-primary,
+      .btn-ghost {
+        width: 100%;
+        justify-content: center;
+      }
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
 
-        /* GLOBAL SECTIONS */
-        .home-section {
-            max-width: 1200px;
-            margin: 4rem auto;
-            padding: 0 2rem;
-        }
+    /* GLOBAL SECTIONS */
+    .home-section {
+      max-width: 1200px;
+      margin: 4rem auto;
+      padding: 0 2rem;
+    }
 
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: end;
-            margin-bottom: 2rem;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-            padding-bottom: 1rem;
-        }
-        :global(.dark) .section-header {
-            border-color: rgba(255, 255, 255, 0.05);
-        }
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      padding-bottom: 1rem;
+    }
+    :global(.dark) .section-header {
+      border-color: rgba(255, 255, 255, 0.05);
+    }
 
-        .view-all {
-            font-family: "Fira Code", monospace;
-            font-size: 0.9rem;
-            color: var(--color-primary);
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            line-height: 1;
-        }
-        .view-all i {
-            display: inline-flex;
-            align-items: center;
-            line-height: 0;
-        }
+    .view-all {
+      font-family: "Fira Code", monospace;
+      font-size: 0.9rem;
+      color: var(--color-primary);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      line-height: 1;
+    }
+    .view-all i {
+      display: inline-flex;
+      align-items: center;
+      line-height: 0;
+    }
 
-        /* GRIDS */
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-        }
-        .grid-3 {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-        }
+    /* GRIDS */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
 
-        /* MINI CARDS */
-        .mini-card {
-            background: rgba(255, 255, 255, 0.4);
-            border: 1px solid var(--color-border);
-            padding: 2rem;
-            border-radius: 20px;
-            text-decoration: none;
-            color: var(--color-text);
-            transition: all 0.3s ease;
-        }
-        :global(.dark) .mini-card {
-            background: rgba(20, 20, 20, 0.4);
-        }
+    /* MINI CARDS */
+    .mini-card {
+      background: rgba(255, 255, 255, 0.4);
+      border: 1px solid var(--color-border);
+      padding: 2rem;
+      border-radius: 20px;
+      text-decoration: none;
+      color: var(--color-text);
+      transition: all 0.3s ease;
+    }
+    :global(.dark) .mini-card {
+      background: rgba(20, 20, 20, 0.4);
+    }
 
-        .mini-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-md);
-        }
+    .mini-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-md);
+    }
 
-        .mini-card.rage {
-            border-left: 4px solid #ef4444;
-        }
-        .mini-card.placeholder {
-            opacity: 0.6;
-            border-style: dashed;
-        }
+    .mini-card.rage {
+      border-left: 4px solid #ef4444;
+    }
+    .mini-card.placeholder {
+      opacity: 0.6;
+      border-style: dashed;
+    }
 
-        .tag {
-            font-family: "Fira Code", monospace;
-            font-size: 0.75rem;
-            color: #ef4444;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-            display: block;
-        }
-        .mini-card h3 {
-            font-family: "Fraunces", serif;
-            font-size: 1.5rem;
-            margin: 0 0 0.5rem 0;
-        }
-        .mini-card p {
-            font-size: 0.95rem;
-            margin: 0;
-            opacity: 0.8;
-        }
+    .tag {
+      font-family: "Fira Code", monospace;
+      font-size: 0.75rem;
+      color: #ef4444;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+    .mini-card h3 {
+      font-family: "Fraunces", serif;
+      font-size: 1.5rem;
+      margin: 0 0 0.5rem 0;
+    }
+    .mini-card p {
+      font-size: 0.95rem;
+      margin: 0;
+      opacity: 0.8;
+    }
 
-        .project-glass {
-            background: var(--color-surface);
-            border: 1px solid var(--color-border);
-            padding: 1.5rem;
-            border-radius: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-        .project-glass .icon {
-            font-size: 1.5rem;
-            color: var(--color-primary);
-            margin-bottom: 0.5rem;
-        }
-        .project-glass h3 {
-            margin: 0;
-            font-size: 1.2rem;
-        }
-        .project-glass p {
-            margin: 0;
-            font-size: 0.9rem;
-            opacity: 0.7;
-        }
-    </style>
+    .project-glass {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      padding: 1.5rem;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .project-glass .icon {
+      font-size: 1.5rem;
+      color: var(--color-primary);
+      margin-bottom: 0.5rem;
+    }
+    .project-glass h3 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+    .project-glass p {
+      margin: 0;
+      font-size: 0.9rem;
+      opacity: 0.7;
+    }
+  </style>
 </Layout>
